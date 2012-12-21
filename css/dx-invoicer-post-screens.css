@@ -1,0 +1,8 @@
+#dx-invoice-meta-wrapper section {
+  margin-bottom: 10px; }
+#dx-invoice-meta-wrapper label {
+  min-width: 150px;
+  display: block;
+  margin-bottom: 5px; }
+#dx-invoice-meta-wrapper input, #dx-invoice-meta-wrapper textarea, #dx-invoice-meta-wrapper select {
+  min-width: 200px; }

@@ -17,6 +17,7 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 		 * Constructor
 		 */
 		public function __construct() {
+			$this->enqueue_scripts_styles();
 			$this->include_files();
 			$this->register_cpts();
 			$this->prepare_hooks();
@@ -31,6 +32,26 @@ if( !class_exists( 'DX_Invoicer' ) ) {
  			require_once 'helpers/form-helper.php';
  			new DX_Invoice_Class();
  			new DX_Customer_Class();
+		}
+		
+		/**
+		 * Prepare scripts and styles, yo!
+		 */
+		public function enqueue_scripts_styles() {
+			add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_styles' ) );
+			add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_styles' ) );
+		}
+		
+		public function admin_enqueue_styles( $hook ) {
+			if( $hook == 'edit.php' || $hook == 'post-new.php' ) {
+				wp_enqueue_style( 'dx-invoicer-post-screens', plugins_url( '/css/dx-invoicer-post-screens.css', __FILE__ ), array(), '1.0', 'screen' );
+			} else if( $hook == 'dx-invoicer' ) { // TODO: is this a valid hook?
+				wp_enqueue_style( 'dx-invoicer-admin', plugins_url( '/css/dx-invoicer-admin.css', __FILE__ ), array(), '1.0', 'screen' );
+			}
+		}
+
+		public function wp_enqueue_styles() {
+			wp_enqueue_style( 'dx-invoicer', plugins_url( '/css/dx-invoicer.css',_FILE_), array(), '1.0', 'screen' );
 		}
 		
 		/**
