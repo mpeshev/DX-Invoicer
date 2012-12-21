@@ -82,6 +82,8 @@ class DX_Form_Helper {
 				<?php	
 			}
 			
+			do_action( 'dx_invoicer_form_fields_action', $type, $item, $attributes, $method, $section_prefix, $id_prefix );
+			
 			return trim( ob_get_clean() );
 		}
 		
@@ -113,7 +115,8 @@ class DX_Form_Helper {
 				$value = isset($_POST[$item]) ? $_POST[$item] : null;
 			}
 			
-			return array(
+			// Form the attributes array
+			$attributes = array(
 					'name' => $name, 
 					'value' => $value, 
 					'text' => $text, 
@@ -122,5 +125,9 @@ class DX_Form_Helper {
 					'class' => $class,
 					'style' => $style
 			);
+
+
+			// Filter attributes if any new form of attribute is discovered
+			return apply_filters( 'dx_invoice_attributes_setup', $attributes );
 	}
 }
