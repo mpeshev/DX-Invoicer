@@ -30,6 +30,8 @@ if( !class_exists( 'DX_Invoicer' ) ) {
  			require_once 'inc/invoice.class.php';
  			require_once 'inc/customer.class.php';
  			require_once 'helpers/form-helper.php';
+ 			require_once 'helpers/form-filters.php';
+ 			
  			new DX_Invoice_Class();
  			new DX_Customer_Class();
 		}
@@ -43,10 +45,15 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 		}
 		
 		public function admin_enqueue_styles( $hook ) {
-			if( $hook == 'edit.php' || $hook == 'post-new.php' ) {
+			wp_enqueue_script('jquery');
+			
+			if( $hook == 'post.php' || $hook == 'post-new.php' ) {
 				wp_enqueue_style( 'dx-invoicer-post-screens', plugins_url( '/css/dx-invoicer-post-screens.css', __FILE__ ), array(), '1.0', 'screen' );
+				wp_enqueue_script( 'dx-invoicer-post-screens', plugins_url( '/js/dx-invoicer-post-screens.js', __FILE__ ), array( 'jquery' ) );
+				wp_enqueue_script( 'dx-invoicer-admin', plugins_url( '/js/dx-invoicer-admin.js', __FILE__ ), array( 'jquery' ) );
 			} else if( $hook == 'dx-invoicer' ) { // TODO: is this a valid hook?
 				wp_enqueue_style( 'dx-invoicer-admin', plugins_url( '/css/dx-invoicer-admin.css', __FILE__ ), array(), '1.0', 'screen' );
+				wp_enqueue_script( 'dx-invoicer-admin', plugins_url( '/js/dx-invoicer-admin.js', __FILE__ ), array( 'jquery' ) );
 			}
 		}
 
@@ -67,6 +74,9 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 			
 			add_action( 'add_meta_boxes', array( DX_Invoice_Class, 'register_invoice_custom_meta' ), 12 );
 			add_action( 'add_meta_boxes', array( DX_Customer_Class, 'register_customer_custom_meta' ), 12 );
+			
+			add_action( 'save_post', array( DX_Invoice_Class, 'save_invoice_post' ) );
+			add_action( 'save_post', array( DX_Customer_Class, 'save_customer_post' ) );
 		}
 		
 	}

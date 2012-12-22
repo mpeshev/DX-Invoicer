@@ -88,4 +88,20 @@ class DX_Customer_Class {
 			</div>
 		<?php 
 	}
+	
+	/**
+	 * Manage post save
+	 * @param $post_id integer. ID of current post
+	 * @param $post post object
+	 */
+	public static function save_customer_post( $post_id ) {
+		// Avoid autosaves
+		if( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
+			
+		// Verify nonces for ineffective calls
+		if( !isset( $_POST['customer_nonce'] ) || !wp_verify_nonce( $_POST['customer_nonce'], 'customer_nonce' ) ) return;
+	
+		// if our current user can't edit this post, bail
+		if( !current_user_can( 'editor' ) ) return;
+	}
 }
