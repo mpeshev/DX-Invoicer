@@ -78,11 +78,16 @@ class DX_Form_Filters {
 					<?php 
 						foreach( $this->cols as $key => $col ) {
 							$value = ''; 
-							if( isset( $row[$key] ) ) {
-								$value = $row[$key];
+							$span_class = '';
+							
+							if( $key == 'net' ) {
+								$span_class = 'dx_invoice_net_all';
+							}
+							else if( $key == 'total' ) {
+								$span_class = 'dx_invoice_total_all';
 							}
 							
-							echo '<td class="' . esc_attr( DX_Invoicer::get_default_table_header_classes( $key ) ) . '"><span></span></td>';								
+							echo '<td class="' . esc_attr( DX_Invoicer::get_default_table_header_classes( $key ) ) . '"><span class="' . $span_class . '"></span></td>';								
 						}
 					?>
 					</tr>

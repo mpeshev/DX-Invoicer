@@ -53,6 +53,7 @@ dxInvoiceTable.prototype.default_fields = {
 };
 
 jQuery(document).ready(function($) {
+	// add new invoice row handler
 	$('#dx-items-table-meta-wrapper .dx_invoice_add_row').on('click', function( e ) {
 		e.preventDefault();
 		
@@ -62,6 +63,7 @@ jQuery(document).ready(function($) {
 		$('#dx_invoice_rows_number').val(rows);
 	});
 	
+	// delete event handler
 	$('#dx-items-table-meta-wrapper').on('click', '.dx_invoice_delete_row', function( e ) {
 		e.preventDefault();
 		var mainTable = new dxInvoiceTable( 'dx_invoice_field_table' );
@@ -72,5 +74,27 @@ jQuery(document).ready(function($) {
 		
 	});
 	
+	// datepicker for dates
 	$('.trigger_datepicker').datepicker();
+	
+	// calculate totals for net and total fields in invoice rows
+	$('.dx_invoice_field_table').on('change', '.dx_invoice_net_field', function(e) {
+		var total = 0;
+		
+		$('.dx_invoice_net_field').each(function() {
+	        total += Number( $(this).val() );
+	    });
+		
+		$('.dx_invoice_net_all').html( total );
+	});
+	
+	$('.dx_invoice_field_table').on('change', '.dx_invoice_total_field', function(e) {
+		var total = 0;
+		
+		$('.dx_invoice_total_field').each(function() {
+	        total += Number( $(this).val() );
+	    });
+		
+		$('.dx_invoice_total_all').html( total );
+	});
 });

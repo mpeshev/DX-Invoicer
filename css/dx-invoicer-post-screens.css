@@ -10,12 +10,15 @@
 #dx-items-table-meta-wrapper .dx_invoice_number_field {
   width: 40px; }
 #dx-items-table-meta-wrapper .dx_invoice_description_field {
-  width: 140px; }
+  width: 340px; }
 #dx-items-table-meta-wrapper .dx_invoice_rate_field {
   width: 60px; }
 #dx-items-table-meta-wrapper .dx_invoice_quantity_field {
   width: 40px; }
 #dx-items-table-meta-wrapper .dx_invoice_net_field {
-  width: 60px; }
+  width: 70px; }
 #dx-items-table-meta-wrapper .dx_invoice_total_field {
   width: 80px; }
+
+.dx_results_matcher_table td {
+  padding-right: 6px; }
