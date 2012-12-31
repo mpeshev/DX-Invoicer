@@ -49,6 +49,14 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 			
 			if( $hook == 'post.php' || $hook == 'post-new.php' ) {
 				wp_enqueue_style( 'dx-invoicer-post-screens', plugins_url( '/css/dx-invoicer-post-screens.css', __FILE__ ), array(), '1.0', 'screen' );
+				
+				// style for datepicker
+				global $wp_scripts;
+				wp_enqueue_script('jquery-ui-datepicker');
+				$ui = $wp_scripts->query('jquery-ui-core');
+				$url = "http://ajax.googleapis.com/ajax/libs/jqueryui/{$ui->ver}/themes/smoothness/jquery-ui.css";
+				wp_enqueue_style('jquery-ui-smoothness', $url, false, $ui->ver);
+				
 				wp_enqueue_script( 'dx-invoicer-post-screens', plugins_url( '/js/dx-invoicer-post-screens.js', __FILE__ ), array( 'jquery' ) );
 				wp_enqueue_script( 'dx-invoicer-admin', plugins_url( '/js/dx-invoicer-admin.js', __FILE__ ), array( 'jquery' ) );
 			} else if( $hook == 'dx-invoicer' ) { // TODO: is this a valid hook?
@@ -77,6 +85,19 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 			
 			add_action( 'save_post', array( DX_Invoice_Class, 'save_invoice_post' ) );
 			add_action( 'save_post', array( DX_Customer_Class, 'save_customer_post' ) );
+		}
+		
+		public static function get_default_table_header_classes( $column_name ) {
+			switch( $column_name ) {
+				case 'number': return 'dx_invoice_number_field';
+				case 'description': return 'dx_invoice_description_field';
+				case 'rate': return 'dx_invoice_rate_field';
+				case 'quantity': return 'dx_invoice_quantity_field';
+				case 'net': return 'dx_invoice_net_field';
+				case 'total': return 'dx_invoice_total_field';
+				
+				default: return apply_filters('dx_invoicer_default_column_class_name', '');
+			}
 		}
 		
 	}

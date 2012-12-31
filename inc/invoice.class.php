@@ -13,7 +13,7 @@ class DX_Invoice_Class {
 				),
 				'client' => array( // would be with suggestion and 'add new'
 						'label' => __('Client', 'dxinvoice'),
-						'type' => 'text'
+						'type' => 'dx_customer_field'
 				),
 				'amount'  => array(
 						'label' => __('Amount', 'dxinvoice'),

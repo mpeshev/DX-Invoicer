@@ -11,3 +11,12 @@
 		min-width: 200px; 
 	}
 }
+
+#dx-items-table-meta-wrapper {
+	.dx_invoice_number_field { width: 40px; }
+	.dx_invoice_description_field { width: 340px; }
+	.dx_invoice_rate_field { width: 60px; }
+	.dx_invoice_quantity_field { width: 40px; }
+	.dx_invoice_net_field { width: 70px; }
+	.dx_invoice_total_field { width: 80px; }
+}

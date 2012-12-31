@@ -6,3 +6,16 @@
   margin-bottom: 5px; }
 #dx-invoice-meta-wrapper input, #dx-invoice-meta-wrapper textarea, #dx-invoice-meta-wrapper select {
   min-width: 200px; }
+
+#dx-items-table-meta-wrapper .dx_invoice_number_field {
+  width: 40px; }
+#dx-items-table-meta-wrapper .dx_invoice_description_field {
+  width: 140px; }
+#dx-items-table-meta-wrapper .dx_invoice_rate_field {
+  width: 60px; }
+#dx-items-table-meta-wrapper .dx_invoice_quantity_field {
+  width: 40px; }
+#dx-items-table-meta-wrapper .dx_invoice_net_field {
+  width: 60px; }
+#dx-items-table-meta-wrapper .dx_invoice_total_field {
+  width: 80px; }
