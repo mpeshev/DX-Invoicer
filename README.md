@@ -1,7 +1,7 @@
 DX-Invoicer
 ===========
 
-DX Invoicer - WordPress Invoicing Plugin
+DX Invoicer - WordPress Invoicing Plugin (still early beta)
 
 The DX Invoicer plugin is handy for handling invoice for your own company. 
 
