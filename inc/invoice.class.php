@@ -10,6 +10,7 @@ class DX_Invoice_Class {
 				'invoice_number' => array(
 						'label' => __('Invoice Number', 'dxinvoice'),
 						'type' => 'text'
+						
 				),
 				'client' => array( // would be with suggestion and 'add new'
 						'label' => __('Client', 'dxinvoice'),
@@ -139,6 +140,7 @@ class DX_Invoice_Class {
 		
 		// fill a new array with the existing values
 		// very annoying conversions, but we could live with that.
+		
 		$meta_array = array();
 		foreach( self::$fields as $key => $args ) {
 			if( ! empty( $custom[$key] ) && is_array( $custom[$key] ) ) {
@@ -152,16 +154,43 @@ class DX_Invoice_Class {
 				}
 
 				$meta_array[$key] = $custom_value;
+			} else {
+				if($key =='invoice_number'){
+					$invoice_title =  get_option( 'dx_invoice_options' );
+					$meta_array[$key] = isset($invoice_title['invoice_num'])? $invoice_title['invoice_num'] + $invoice_title['increment']:"";
+					// Check existing		
+						$my_query = new WP_Query( 
+						    array(
+						      'post_type' => 'dx_invoice',
+						      'post__not_in'=> array($post->ID),
+						      'meta_query' => array(
+						        array(
+						          'key' => 'invoice_number',
+						          'value' => $meta_array[$key]
+						        )
+						      ),
+						    ) 
+						  );
+						  if(count($my_query->posts) != 0 ){
+							  	global $wpdb;
+							    $query = "SELECT max(meta_value) FROM wp_postmeta WHERE meta_key='invoice_number'";
+							    $the_max = $wpdb->get_var($query);
+							    $meta_array[$key] =  $the_max + $invoice_title['increment'] ;
+						  }
+				}
 			}
 		}   
 			
 		$_POST = array_merge($_POST, $meta_array );
 		
 		wp_nonce_field( 'invoice_nonce_save', 'invoice_nonce' );
+		
 	?>	
 		<div id="dx-invoice-meta-wrapper">
 		<?php 
+			
 			foreach( self::$fields as $item => $attributes ) {
+				
 				echo DX_Form_Helper::html_element($item, $attributes, 'POST');
 			}
 		?>
@@ -175,6 +204,7 @@ class DX_Invoice_Class {
 	 * @param $post post object
 	 */
 	public static function save_invoice_post( $post_id ) {
+		
 		// Avoid autosaves
 		if( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
 			
@@ -185,7 +215,38 @@ class DX_Invoice_Class {
 		if( !current_user_can( 'edit_post' ) ) return;
 
 		$rows = !empty( $_POST['dx_invoice_rows_number'] ) ? (int) $_POST['dx_invoice_rows_number'] : 0;
-
+		$publish 	= isset($_POST['publish'])	?	$_POST['publish']	:"";
+		$save 		= isset($_POST['save'])		?	$_POST['save']		:"";
+		
+		// Update Invoice in setting
+		if($publish == 'Publish' || $save  == 'Update'){
+			$invoice_num = isset($_POST['invoice_number'])? $_POST['invoice_number']:"";
+			// Checking post invoice number
+			$my_query = new WP_Query( 
+			    array(
+			      'post_type' => 'dx_invoice',
+			      'post__not_in'=> array($post_id),
+			      'meta_query' => array(
+			        array(
+			          'key' => 'invoice_number',
+			          'value' => $invoice_num
+			        )
+			      ),
+			    ) 
+			  );
+			  
+			if(count($my_query->posts) == 0 ){
+				
+				$old_invoice	= get_option( 'dx_invoice_options' );
+				$old_invoice["invoice_num"] = $invoice_num;
+				update_option( 'dx_invoice_options', $old_invoice );
+			}
+			else{ 
+				
+				 wp_redirect(wp_get_referer()."&message=99"); exit;
+			}			
+		}
+		
 		if( is_numeric( $rows ) ) {
 			$form_filters = DX_Form_Filters::instance();
 			$cols = $form_filters->cols;
@@ -228,4 +289,52 @@ class DX_Invoice_Class {
 		
 		return $results;
 	}
+	
+	 /**
+	 * Add menu/Submenu
+	 /**
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 */
+	public function dx_invoice_add_menu_page() { 
+		
+		$dx_invoice_settings = add_menu_page( __( 'Invoice Settings', 'dxinvoice' ), __( 'Invoice Settings', 'dxinvoice' ), 'manage_options','dx_invoice_settings', array($this, 'dx_invoice_settings') );
+	    //add_action( "admin_head-$dx_invoice_settings", array( $this, 'dx_invoice_settings_scripts' ) );
+	}
+	 /**
+	 * Add menu/Submenu
+	 /**
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 */
+	public function dx_invoice_settings(){
+		include_once DX_INV_DIR.'/helpers/invoice-settings.php';
+	}
+		
+	/**
+	 * Register setting Option
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 */
+	public function dx_invoice_admin_init() {
+		
+		register_setting( 'invoice_plugin_options', 'dx_invoice_options' );
+		
+	}
+	/**
+	 * Register setting Option
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 */
+	function dx_invoice_error_notice(){
+     global $current_screen; 
+     $message = isset($_REQUEST['message'])?$_REQUEST['message']:"";
+     if ( $current_screen->parent_base == 'edit' && $message == 99 )
+          echo '<div class="error"><p>Warning - Invoice Number is already exist.</p></div>';
+	}
+
+	
+	
 }

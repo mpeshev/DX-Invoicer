@@ -10,6 +10,15 @@ class DX_Form_Helper {
 	public static function html_element($item, $attributes, $method, $section_prefix = 'section_', $id_prefix = '' ) {
 		
 		extract( array_merge ($attributes, self::get_element_attributes( $item, $attributes, $method ) ) );
+		$label = !empty($label)	? $label	:"";
+	    $type  = !empty($type)	? $type		:"";
+	    $name  = !empty($name)	? $name		:"";
+	    $value = !empty($value)	? $value	:"";
+	    $text  = !empty($text)	? $text		:"";
+	    $id    = !empty($id)	? $id		:"";
+	    $class = !empty($class)	? $class	:"";
+	    $style = !empty($style)	? $style	:"";
+	   
 		ob_start();
 		if ($type == 'checkbox') {
 			?>
@@ -87,7 +96,8 @@ class DX_Form_Helper {
 			return trim( ob_get_clean() );
 		}
 		
-		private static function get_element_attributes( $item, $attributes, $method ) {
+		public static function get_element_attributes( $item, $attributes, $method ) {
+			
 			$text = $item;
 			if (isset($attributes['label'])) { $text = $attributes['label']; }
 			
@@ -125,7 +135,6 @@ class DX_Form_Helper {
 					'class' => $class,
 					'style' => $style
 			);
-
 
 			// Filter attributes if any new form of attribute is discovered
 			return apply_filters( 'dx_invoice_attributes_setup', $attributes );

@@ -9,7 +9,7 @@ class DX_Form_Filters {
 	private function __construct() {
 		$this->cols  = array(
 				'number' 	  => _x('Number', 'invoice item number', 'dxinvoice'),
-				'description' => _x('Description', 'invoice description type', 'dxinvoice'),
+				'invoice_description' => _x('Description', 'invoice description type', 'dxinvoice'),
 				'rate'		  => _x('Rate', 'invoice description type', 'dxinvoice'),
 				'quantity' 	  => _x('Quantity', 'invoice description type', 'dxinvoice'),
 				'net' 		  => _x('Net', 'invoice description type', 'dxinvoice'),
@@ -35,8 +35,18 @@ class DX_Form_Filters {
 	 * @param $id_prefix a prefix for IDs, if any
 	 */
 	public function add_invoice_row_field( $type, $item, $attributes, $method, $section_prefix, $id_prefix ) {
+		
 		if( $type == 'dx_invoicer_form_field' ) {
 			extract( $attributes );
+			
+			$label = !empty($label)	? $label	:"";
+		    $type  = !empty($type)	? $type		:"";
+		    $name  = !empty($name)	? $name		:"";
+		    $value = !empty($value)	? $value	:"";
+		    $text  = !empty($text)	? $text		:"";
+		    $id    = !empty($id)	? $id		:"";
+		    $class = !empty($class)	? $class	:"";
+		    $style = !empty($style)	? $style	:"";
 			$initial_rows = 0;
 			ob_start();
 		?>
@@ -120,7 +130,16 @@ class DX_Form_Filters {
 	 */
 	public function add_customer_field( $type, $item, $attributes, $method, $section_prefix, $id_prefix ) {
 		if( $type == 'dx_customer_field' ) {
-			extract( $attributes );
+			//extract( $attributes );
+			extract( array_merge ($attributes, DX_Form_Helper::get_element_attributes( $item, $attributes, $method ) ) );
+			$label = !empty($label)	? $label	:"";
+		    $type  = !empty($type)	? $type		:"";
+		    $name  = !empty($name)	? $name		:"";
+		    $value = !empty($value)	? $value	:"";
+		    $text  = !empty($text)	? $text		:"";
+		    $id    = !empty($id)	? $id		:"";
+		    $class = !empty($class)	? $class	:"";
+		    $style = !empty($style)	? $style	:"";
 			$initial_rows = 0;
 			$current_user_id = get_current_user_id();
 			$customers_query = new WP_Query(array(
