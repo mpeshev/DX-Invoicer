@@ -7,39 +7,60 @@ class DX_Invoice_Class {
 	
 	public function __construct() {
 		self::$fields = array(
-				'invoice_number' => array(
+				'_invoice_number' => array(
 						'label' => __('Invoice Number', 'dxinvoice'),
-						'type' => 'text'
-						
+						'type' => 'text',
+						'desc' => 'Enter Invoice Number'
 				),
-				'client' => array( // would be with suggestion and 'add new'
+				'_client' => array( // would be with suggestion and 'add new'
 						'label' => __('Client', 'dxinvoice'),
-						'type' => 'dx_customer_field'
+						'type' => 'dx_customer_field',
+						'desc' => 'Select Client'
 				),
-				'amount'  => array(
+				'_page_templates' => array( // would be with suggestion and 'add new'
+						'label' => __('Page Templates', 'dxinvoice'),
+						'type' => 'dx_custom_templates',
+						'desc' => 'Select Page Template'
+				),
+				'_amount'  => array(
 						'label' => __('Amount', 'dxinvoice'),
-						'type' => 'text'
+						'type' => 'text',
+						'desc' => 'Enter Amount'
 				),
-				'amount_text' => array(
+				'_amount_text' => array(
 						'label' => __('Amount (in words)', 'dxinvoice'),
-						'type' => 'text'
+						'type' => 'text',
+						'desc' => 'Enter Amount In Word'
 				),
-				'currency' => array(
+				'_currency' => array(
 						'label' => __('Currency', 'dxinvoice'),
 						'type' => 'select',
+						'desc' => 'Select Currency',
 						'options' => array(
 								'bgn' => __('BGN', 'dxinvoice'),
 								'eur' => __('EUR', 'dxinvoice'),
 								'usd' => __('USD', 'dxinvoice')
 						)
 				),
-				'description' => array(
+				'_description' => array(
 						'label' => __('Details of the payment', 'dxinvoice'),
-						'type' => 'textarea'
+						'type' => 'textarea',
+						'desc' => 'Enter Payment Detail'
 				),
-				'date_of_execution' => array(
+				'_date_of_execution' => array(
 						'label' => __('Date of execution', 'dxinvoice'),
-						'type' => 'date'
+						'type' => 'date',
+						'desc' => 'Select Date'
+				),
+				'_invoice_stamp_img' => array(
+						'label' => __('Invoice Stamp', 'dxinvoice'),
+						'type' => 'image',
+						'desc' => 'Upload Stamp'
+				),
+				'_invoice_signature_img' => array(
+						'label' => __('Invoice Signature', 'dxinvoice'),
+						'type' => 'image',
+						'desc' => 'Upload Signature'
 				)
 		);
 		
@@ -155,9 +176,10 @@ class DX_Invoice_Class {
 
 				$meta_array[$key] = $custom_value;
 			} else {
-				if($key =='invoice_number'){
+				if($key =='_invoice_number'){
 					$invoice_title =  get_option( 'dx_invoice_options' );
-					$meta_array[$key] = isset($invoice_title['invoice_num'])? $invoice_title['invoice_num'] + $invoice_title['increment']:"";
+					$increment = isset($invoice_title['increment'])?$invoice_title['increment']:0;
+					$meta_array[$key] = isset($invoice_title['invoice_num'])? $invoice_title['invoice_num'] + $increment :"";
 					// Check existing		
 						$my_query = new WP_Query( 
 						    array(
@@ -165,7 +187,7 @@ class DX_Invoice_Class {
 						      'post__not_in'=> array($post->ID),
 						      'meta_query' => array(
 						        array(
-						          'key' => 'invoice_number',
+						          'key' => '_invoice_number',
 						          'value' => $meta_array[$key]
 						        )
 						      ),
@@ -173,9 +195,9 @@ class DX_Invoice_Class {
 						  );
 						  if(count($my_query->posts) != 0 ){
 							  	global $wpdb;
-							    $query = "SELECT max(meta_value) FROM wp_postmeta WHERE meta_key='invoice_number'";
+							    $query = "SELECT max(meta_value) FROM wp_postmeta WHERE meta_key='_invoice_number'";
 							    $the_max = $wpdb->get_var($query);
-							    $meta_array[$key] =  $the_max + $invoice_title['increment'] ;
+							    $meta_array[$key] =  $the_max + $increment ;
 						  }
 				}
 			}
@@ -187,6 +209,8 @@ class DX_Invoice_Class {
 		
 	?>	
 		<div id="dx-invoice-meta-wrapper">
+		<table class="form-table"> 
+			<tbody>
 		<?php 
 			
 			foreach( self::$fields as $item => $attributes ) {
@@ -194,6 +218,8 @@ class DX_Invoice_Class {
 				echo DX_Form_Helper::html_element($item, $attributes, 'POST');
 			}
 		?>
+			</tbody>
+		</table>
 		</div>
 	<?php 
 	}
@@ -220,7 +246,7 @@ class DX_Invoice_Class {
 		
 		// Update Invoice in setting
 		if($publish == 'Publish' || $save  == 'Update'){
-			$invoice_num = isset($_POST['invoice_number'])? $_POST['invoice_number']:"";
+			$invoice_num = isset($_POST['_invoice_number'])? $_POST['_invoice_number']:"";
 			// Checking post invoice number
 			$my_query = new WP_Query( 
 			    array(
@@ -228,7 +254,7 @@ class DX_Invoice_Class {
 			      'post__not_in'=> array($post_id),
 			      'meta_query' => array(
 			        array(
-			          'key' => 'invoice_number',
+			          'key' => '_invoice_number',
 			          'value' => $invoice_num
 			        )
 			      ),
@@ -332,9 +358,43 @@ class DX_Invoice_Class {
      global $current_screen; 
      $message = isset($_REQUEST['message'])?$_REQUEST['message']:"";
      if ( $current_screen->parent_base == 'edit' && $message == 99 )
-          echo '<div class="error"><p>Warning - Invoice Number is already exist.</p></div>';
+      	echo '<div class="error"><p>'.__('Warning - Invoice Number is already exist','dxinvoice').'</p></div>';
+	 if ( $current_screen->parent_base == 'edit' && $message == 98 )
+	  echo '<div class="error"><p>'.__('Warning - Please select customer before print','dxinvoice').'</p></div>';
 	}
-
 	
+	/**
+	 * Add button above post
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 */
+	function dx_top_form_edit( $post ) {
+		$preview = "";
+	    if( 'dx_invoice' == $post->post_type ){
+	       $preview = add_query_arg( array( 'post_type' => $post->post_type, 'dx_action_validate' => 'generate-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' ) ); 
+	        echo '	<input type="hidden" name="dx_action_validate" value="0">
+	        		<input type="hidden" name="dx_action" value="generate-pdf">
+	        		<a type="submit" class="dx-pdf-generate button" id="" href="'.$preview.'">'.__('Generate PDF/Print','dxinvoice').'</a>
+	        	';
+	    }
+	}
+	/**
+	 * Register setting Option
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 */		
+	function dx_pdf_form_load(){
+		$post_id = isset($_REQUEST['post_ID'])?$_REQUEST['post_ID']:"";
+		$action = isset($_REQUEST['dx_action'])?$_REQUEST['dx_action']:"";
+		$action_validate = isset($_REQUEST['dx_action_validate'])?$_REQUEST['dx_action_validate']:"";
+		
+		if($action_validate == 'generate-pdf' ){
+			//include_once DX_INV_DIR.'/inc/pdf-library/pdf-template-generate.php';
+			include_once DX_INV_DIR.'/inc/pdf-library/dx-pdf-process.php';
+			//dx_invoice_to_pdf();
+		}
+	}
 	
 }

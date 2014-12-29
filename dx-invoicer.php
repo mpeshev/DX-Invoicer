@@ -13,6 +13,9 @@ global $dx_customer_instance, $dx_invoice_instance,$wp_version;;
 if( !defined( 'DX_INV_DIR' ) ) {
 	define( 'DX_INV_DIR', dirname( __FILE__ ) ); // plugin dir
 }
+if( !defined( 'DX_INV_URL' ) ) {
+	define( 'DX_INV_URL', plugin_dir_url( __FILE__ ) ); // plugin dir
+}
 
 if( !class_exists( 'DX_Invoicer' ) ) {
 	class DX_Invoicer {
@@ -31,10 +34,10 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 		 */
 		public function include_files() {
 			global $dx_customer_instance, $dx_invoice_instance;
- 			require_once 'inc/invoice.class.php';
- 			require_once 'inc/customer.class.php';
- 			require_once 'helpers/form-helper.php';
- 			require_once 'helpers/form-filters.php';
+ 			require_once DX_INV_DIR.'/inc/invoice.class.php';
+ 			require_once DX_INV_DIR.'/inc/customer.class.php';
+ 			require_once DX_INV_DIR.'/helpers/form-helper.php';
+ 			require_once DX_INV_DIR.'/helpers/form-filters.php';
  			
  			
  			$dx_invoice_instance = new DX_Invoice_Class();
@@ -51,7 +54,6 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 		
 		public function admin_enqueue_styles( $hook ) {
 			global $wp_version;
-			
 			wp_enqueue_script('jquery');
 			
 			if( $hook == 'post.php' || $hook == 'post-new.php' ) {
@@ -66,11 +68,24 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 				
 				wp_enqueue_script( 'dx-invoicer-post-screens', plugins_url( '/js/dx-invoicer-post-screens.js', __FILE__ ), array( 'jquery' ) );
 				wp_enqueue_script( 'dx-invoicer-admin', plugins_url( '/js/dx-invoicer-admin.js', __FILE__ ), array( 'jquery' ) );
-			} else if( $hook == 'dx-invoicer' || $hook == 'toplevel_page_dx_invoice_settings' ) { // TODO: is this a valid hook?
+			} else if( $hook == 'dx-invoicer' || $hook == 'toplevel_page_dx_invoice_settings') { // TODO: is this a valid hook?
 				wp_enqueue_style( 'dx-invoicer-admin', plugins_url( '/css/dx-invoicer-admin.css', __FILE__ ), array(), '1.0', 'screen' );
 				wp_enqueue_script( 'dx-invoicer-admin', plugins_url( '/js/dx-invoicer-admin.js', __FILE__ ), array( 'jquery' ) );
+				//wp_localize_script( 'dx-invoicer-admin','DXINVOICE',array( 'ajaxurl'=>	admin_url( 'admin-ajax.php', ( is_ssl() ? 'https' : 'http' ) ) ));
+			}
+			
+			$hook_file = array('post.php','toplevel_page_dx_invoice_settings','post-new.php');
+			if(in_array($hook,$hook_file)){ 
+				wp_enqueue_script('postbox');
+				wp_enqueue_script( 'dx-invoicer-upload', plugins_url( '/js/dx-invoicer-img.js', __FILE__ ), array( 'jquery' ) );
+				
+				//Chooser CSS/JS
+					wp_enqueue_style( 'dx-chosen-css',plugins_url( '/js/chosen/chosen.css', __FILE__ ), array(), null );	
+					wp_enqueue_style( 'dx-chosen-custom-css', plugins_url( '/js/chosen/chosen-custom.css', __FILE__ ), array(), null );	
+					wp_enqueue_script( 'dx-chosen-js', plugins_url( '/js/chosen/chosen.jquery.js', __FILE__ ), array( 'jquery' ), false, true );
+				
 				$newui = $wp_version >= '3.5' ? '1' : '0'; //check wp version for showing media uploader
-				wp_localize_script( 'dx-invoicer-admin', 'DxImgSettings', array( 'new_media_ui'	=>	$newui	));
+				wp_localize_script( 'dx-invoicer-upload', 'DxImgSettings', array( 'new_media_ui'	=>	$newui	));
 				//for new media uploader
 				wp_enqueue_media();
 			}
@@ -103,6 +118,11 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 			add_action('admin_menu',array($dx_invoice_instance, 'dx_invoice_add_menu_page'));
 			//add_action('admin_menu',array($dx_invoice_instance, 'invoice_detail'));
 			add_action( 'admin_notices', array($dx_invoice_instance, 'dx_invoice_error_notice' ));
+			add_action( 'edit_form_top', array($dx_invoice_instance,'dx_top_form_edit' ));
+			add_action( 'init', array($dx_invoice_instance,'dx_pdf_form_load') );
+			
+			
+			
 		}
 		
 		public static function get_default_table_header_classes( $column_name ) {

@@ -77,6 +77,22 @@ jQuery(document).ready(function($) {
 	// datepicker for dates
 	$('.trigger_datepicker').datepicker();
 	
+	//On load Net and total
+	var total = 0;
+	$('.dx_invoice_net_field').each(function() {
+	        total += Number( $(this).val() );
+	 });
+	 if(total != 0)
+	$('.dx_invoice_net_all').html( total );
+	
+	var total = 0;
+	$('.dx_invoice_total_field').each(function() {
+	        total += Number( $(this).val() );
+	 });
+	 if(total != 0)
+	$('.dx_invoice_total_all').html( total );
+	
+	
 	// calculate totals for net and total fields in invoice rows
 	$('.dx_invoice_field_table').on('change', '.dx_invoice_net_field', function(e) {
 		var total = 0;

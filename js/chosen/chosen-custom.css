@@ -1,0 +1,32 @@
+/* 
+ * Custom Changes For chosen CSS Styles
+ * 
+ */
+.chosen-container, .chosen-container-single .chosen-single{
+	min-width: 200px !important;
+}
+.chosen-container{
+	margin-right: 10px;
+}
+.chosen-drop {
+	min-width: 210px !important;
+}
+.chosen-search input, .chosen-results {
+	min-width: 200px !important;
+}
+.chosen-select {
+	width: 200px;
+}
+.chosen-search input {
+	width: 100% !important;
+}
+.chosen-container-multi .chosen-choices .search-field input {
+	height: 20px !important;
+}
+.tablenav .actions {
+	overflow: visible;
+}
+.alignleft.actions .chosen-container-single {
+    display: inline-block;
+    vertical-align: middle;
+}

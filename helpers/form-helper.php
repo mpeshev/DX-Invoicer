@@ -18,76 +18,121 @@ class DX_Form_Helper {
 	    $id    = !empty($id)	? $id		:"";
 	    $class = !empty($class)	? $class	:"";
 	    $style = !empty($style)	? $style	:"";
+	    $desc  = !empty($desc)	? $desc	:"";
 	   
 		ob_start();
 		if ($type == 'checkbox') {
 			?>
-					<section id="<?php echo $section_prefix . $id ?>" class="<?php echo $class ?>" <?php echo $style; ?>>
-						<input id="<?php echo $id_prefix . $id ?>" type="<?php echo $type ?>" name="<?php echo $name ?>" value="true" <?php echo $value ? 'checked' : '' ?>/>
-						<label for="<?php echo $id_prefix . $id ?>"><?php echo $text ?></label>	
-					</section>
+				<tr>
+					<th scope="row">
+						<label for="<?php echo $id_prefix . $id ?>"><?php echo $text ?></label>
+					</th>
+					<td><input id="<?php echo $id_prefix . $id ?>" type="<?php echo $type ?>" name="<?php echo $name ?>" value="true" <?php echo $value ? 'checked' : '' ?>/><br />
+						<span class="description"><?php echo $desc; ?></span>
+					</td>
+				</tr>
 				<?php	
 			} elseif ($type == 'textarea') {
 				?>
-					<section id="<?php echo $section_prefix . $id ?>" class="<?php echo $class ?>" <?php echo $style; ?>>
+				<tr>
+					<th scope="row">
 						<label for="<?php echo $id_prefix . $id ?>"><?php echo $text ?></label>	
-						<textarea id="<?php echo $id_prefix . $id ?>" name="<?php echo $name ?>" rows="2" cols="20"><?php echo $value ?></textarea>
-					</section>
+					</th>
+					<td><textarea id="<?php echo $id_prefix . $id ?>" name="<?php echo $name ?>" rows="2" cols="20"><?php echo $value ?></textarea><br />
+						<span class="description"><?php echo $desc; ?></span>
+					</td>
+				</tr>
 				<?php
 			} elseif ($type == 'select') {
 				?>
-					<section id="<?php echo $section_prefix . $id ?>" class="<?php echo $class ?>" <?php echo $style; ?> >
+				<tr>
+					<th scope="row">
 						<label for="<?php echo $id_prefix . $id ?>"><?php echo $text ?></label>	
-						<select name="<?php echo $name ?>" id="<?php echo $id_prefix . $id ?>" <?php echo ($type == 'multiselect' ? 'multiple="multiple"' : '') ?> >
+					</th>
+					<td><select name="<?php echo $name ?>" id="<?php echo $id_prefix . $id ?>" <?php echo ($type == 'multiselect' ? 'multiple="multiple"' : '') ?> >
 							<?php foreach ($options as $key => $text): ?>
 								<option id="<?php echo $key ?>" value="<?php echo $key ?>" <?php echo ($key == $value ? 'selected' : '' ) ?>><?php echo $text ?></option>
 							<?php endforeach ?>
-						</select>
-					</section>
+						</select><br />
+						<span class="description"><?php echo $desc; ?></span>
+					</td>
+				</tr>
+					
 				<?php	
 			} elseif ($type == 'multiselect') {
 				?>
-					<section id="<?php echo $section_prefix . $id ?>" class="<?php echo $class ?>" <?php echo $style; ?> >
+				<tr>
+					<th scope="row">
 						<label for="<?php echo $id_prefix . $id ?>"><?php echo $text ?></label>	
-						<select name="<?php echo $name ?>[]" id="<?php echo $id_prefix . $id ?>" <?php echo ($type == 'multiselect' ? 'multiple="multiple"' : '') ?> >
+					</th>
+					<td><select name="<?php echo $name ?>[]" id="<?php echo $id_prefix . $id ?>" <?php echo ($type == 'multiselect' ? 'multiple="multiple"' : '') ?> >
 							<?php foreach ($options as $key => $text): ?>
 								<option id="<?php echo $key ?>" value="<?php echo $key ?>" <?php echo ((is_array($value) && in_array($key, $value) ) ? 'selected' : '' ) ?>><?php echo $text ?></option>
 							<?php endforeach ?>
-						</select>
-					</section>
+						</select><br />
+						<span class="description"><?php echo $desc; ?></span>
+					</td>
+				</tr>
+					
 				<?php	
 			} elseif( $type == 'text' ) {
 				?>
-					<section id="<?php echo $section_prefix . $id ?>" class="<?php echo $class ?>" <?php echo $style; ?>>
+				<tr>
+					<th scope="row">
 						<label for="<?php echo $id_prefix . $id ?>"><?php echo $text ?></label>	
-						<input id="<?php echo $id_prefix . $id ?>" type="<?php echo $type ?>" name="<?php echo $name ?>" value="<?php echo $value ?>" />
-					</section>
+					</th>
+					<td><input id="<?php echo $id_prefix . $id ?>" type="<?php echo $type ?>" name="<?php echo $name ?>" value="<?php echo $value ?>" /><br />
+						<span class="description"><?php echo $desc; ?></span>
+					</td>
+				</tr>
 				<?php
 			} elseif ( $type == 'date') {
 				?>
-					<section id="<?php echo $section_prefix . $id ?>" class="<?php echo $class ?>" <?php echo $style; ?>>
+				<tr>
+					<th scope="row">
 						<label for="<?php echo $id_prefix . $id ?>"><?php echo $text ?></label>	
-						<input id="<?php echo $id_prefix . $id ?>_picker" class="trigger_datepicker" type="text" name="<?php echo $name ?>" <?php echo !empty($value) ? 'value="'.$value.'"' : ''; ?> />
-					</section>
+					</th>
+					<td><input id="<?php echo $id_prefix . $id ?>_picker" class="trigger_datepicker" type="text" name="<?php echo $name ?>" <?php echo !empty($value) ? 'value="'.$value.'"' : ''; ?> /><br />
+						<span class="description"><?php echo $desc; ?></span>
+					</td>
+				</tr>
+					
 				<?php
 			} elseif( $type == 'image' ) {
 				?>
-					<section id="<?php echo $section_prefix . $id ?>" class="<?php echo $class ?>" <?php echo $style; ?>>
+				<tr>
+					<th scope="row">
 						<label for="<?php echo $id_prefix . $id ?>"><?php echo $text ?></label>	
-						<input id="fileupload" type="file" name="images" name="<?php echo $name ?>" multiple /> 
-					</section>
+					</th>
+					<td><input type="text" class="uploader-text" id="<?php echo $section_prefix . $id ?>" name="<?php echo $id_prefix . $id ?>" value="<?php echo $value; ?>" />
+						<input type="button" class="button-secondary dx-img-uploader" id="dx-img-btn-stamp" name="dx_img_stamp" value="<?php echo __( 'Choose image', 'dxinvoice' ) ?>"><br />
+						<span class="description"><?php echo $desc; ?></span>
+						<?php
+							if(!empty($value)) { //check connect button image
+								$showvalue = ' <img src="'.$value.'" alt="'.__('Image','dxinvoice').'" width="150" height="150"/>';
+							} else {
+								$showvalue = '';
+							}
+						?>	
+						<div id="image-view-<?php echo $name ?>"><?php echo $showvalue; ?></div><br />
+					</td>
+				</tr>
 				<?php
 			} elseif ($type == 'radio') {
 				?>
-					<section id="<?php echo $section_prefix . $id ?>" class="<?php echo $class ?>" <?php echo $style; ?> >
-						<label for="<?php echo $id_prefix . $id ?>"><?php echo $text ?></label>
-						<?php foreach( $options as $key => $text ): ?>
+				<tr>
+				<th scope="row">
+					<label for="<?php echo $id_prefix . $id ?>"><?php echo $text ?></label>
+				</th>
+				<td><?php foreach( $options as $key => $text ): ?>
 						<div class="<?php echo $name . '_radios'; ?>">
 							<label for="<?php echo $name . '_' . $key; ?>"><?php echo $text ?></label>
 							<input id="<?php echo $name . '_' . $key; ?>" type="radio" value="<?php echo $text; ?>" name="<?php echo $name; ?>" />
 						</div>
-						<?php endforeach; ?>	
-					</section>
+						<?php endforeach; ?><br />
+					<span class="description"><?php echo $desc; ?></span>
+				</td>
+			</tr>
 				<?php	
 			}
 			
@@ -104,6 +149,10 @@ class DX_Form_Helper {
 			// CSS if needed
 			$class = '';
 			if (isset($attributes['class'])) { $class = $attributes['class']; }
+			
+			// CSS if needed
+			$desc = '';
+			if (isset($attributes['desc'])) { $desc = $attributes['desc']; }
 			
 			$style = '';
 			if (isset($attributes['style'])) { $style = 'style="' . esc_attr( $attributes['style'] ) . '"'; }
@@ -133,6 +182,7 @@ class DX_Form_Helper {
 					'id' => $id, 
 					'type' => $type, 
 					'class' => $class,
+					'desc' => $desc,
 					'style' => $style
 			);
 
