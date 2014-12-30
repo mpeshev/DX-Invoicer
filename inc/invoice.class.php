@@ -57,6 +57,11 @@ class DX_Invoice_Class {
 						'type' => 'image',
 						'desc' => 'Upload Stamp'
 				),
+				'_stamp_position' => array(
+						'label' => __('Stamp Position', 'dxinvoice'),
+						'type' => 'stamp_position',
+						'desc' => 'Select Stamp Position'
+				),
 				'_invoice_signature_img' => array(
 						'label' => __('Invoice Signature', 'dxinvoice'),
 						'type' => 'image',
@@ -371,11 +376,17 @@ class DX_Invoice_Class {
 	 */
 	function dx_top_form_edit( $post ) {
 		$preview = "";
+		$preview1 = "";
 	    if( 'dx_invoice' == $post->post_type ){
 	       $preview = add_query_arg( array( 'post_type' => $post->post_type, 'dx_action_validate' => 'generate-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' ) ); 
+	       $preview1 = add_query_arg( array( 'post_type' => $post->post_type, 'dx_action_validate' => 'download-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' ) ); 
 	        echo '	<input type="hidden" name="dx_action_validate" value="0">
 	        		<input type="hidden" name="dx_action" value="generate-pdf">
-	        		<a type="submit" class="dx-pdf-generate button" id="" href="'.$preview.'">'.__('Generate PDF/Print','dxinvoice').'</a>
+	        		<a type="submit" class="dx-pdf-generate button" id="" href="'.$preview.'">'.__('Generate Preview','dxinvoice').'</a>
+	        	';
+	        echo '	<input type="hidden" name="dx_action_validate" value="0">
+	        		<input type="hidden" name="dx_action" value="download-pdf">
+	        		<a type="submit" class="dx-pdf-generate button" id="" href="'.$preview1.'">'.__('Download','dxinvoice').'</a>
 	        	';
 	    }
 	}
@@ -393,6 +404,11 @@ class DX_Invoice_Class {
 		if($action_validate == 'generate-pdf' ){
 			//include_once DX_INV_DIR.'/inc/pdf-library/pdf-template-generate.php';
 			include_once DX_INV_DIR.'/inc/pdf-library/dx-pdf-process.php';
+			//dx_invoice_to_pdf();
+		}
+		if($action_validate == 'download-pdf' ){
+			//include_once DX_INV_DIR.'/inc/pdf-library/pdf-template-generate.php';
+			include_once DX_INV_DIR.'/inc/pdf-library/dx-pdf-process-download.php';
 			//dx_invoice_to_pdf();
 		}
 	}

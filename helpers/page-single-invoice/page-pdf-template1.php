@@ -4,6 +4,8 @@ Template Name : Pdf Generate Code
 Ref. Url : --
 Compitible Browser : IE-8, Google Crome, Mozillafirefox-15.0.1
 */
+// Transparancy Image Stamp
+
 $dx_invoice_detail = '<table width="100%" border="0" style="padding:5px; ">
           <tbody><tr><td style="font-size:54px; font-weight:bold;" class="invoice-label" colspan="2">'. __('Invoice','dxinvoice').'</td></tr>
           <tr style="font-size:28px;">
@@ -134,7 +136,7 @@ $customer_detail = '<table style="padding:5px;">
 	<tr style="font-size:30px; text-align:center;">
 		<td>&nbsp;</td>
 		<td><?php echo  __('First Investment Bank','dxinvoice'); ?></td>
-		<td colspan="2">BIC: - </td>
+		<td colspan="2" align="left">BIC: - </td>
 		<td colspan="2"><?php echo  __('IBAN:'.$dx_bank_account,'dxinvoice'); ?></td>
 		<td></td>
 	</tr>

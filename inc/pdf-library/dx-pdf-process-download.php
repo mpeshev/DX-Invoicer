@@ -3,15 +3,9 @@
 // Exit if accessed directly
 if ( !defined( 'ABSPATH' ) ) exit;
 
-	
 	require_once DX_INV_DIR.'/inc/pdf-library/tcpdf/tcpdf.php';
 	  
 	$post_id = isset($_REQUEST['post_ID'])?$_REQUEST['post_ID']:"";
-	$post_status = get_post_status( $post_id ) ;
-	 if("auto-draft" == $post_status){
-	 	echo "Please save post before invoice.";
-	 	exit;
-	 }
 	$postdata = get_post($post_id);
 	// Get Invoice Detail
 	$dx_invoice_number 			= get_post_meta($post_id,'_invoice_number');
@@ -171,7 +165,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 	
 	//Close and output PDF document
 	//Second Parameter I that means display direct and D that means ask download or open this file
-	$pdf->Output( 'pdf-generater-' . date('Y-m-d') . '.pdf', 'I' );
+	$pdf->Output( 'pdf-generater-' . date('Y-m-d') . '.pdf', 'D' );
 	exit;
 
 

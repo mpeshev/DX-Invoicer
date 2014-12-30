@@ -10,6 +10,14 @@ jQuery(document).ready(function($){
 			return true;
 		}
 	});
+	$('#publish').click(function(){
+		$titleval = $('#title').val();
+		if($.trim($titleval) == ''){
+			$('#title').css('border','1px solid red');
+			return false;
+		}
+		
+	});
 	/*$('.handlediv').click(function(){
 		$('#settings').toggleClass('closed');
 	});

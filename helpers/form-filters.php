@@ -23,6 +23,7 @@ class DX_Form_Filters {
 		add_action( 'dx_invoicer_form_fields_action', array( $this, 'add_invoice_row_field' ), 10, 6 );
 		add_action( 'dx_invoicer_form_fields_action', array( $this, 'add_customer_field' ), 10, 6 );
 		add_action( 'dx_invoicer_form_fields_action', array( $this, 'add_custom_templates' ), 10, 6 );
+		add_action( 'dx_invoicer_form_fields_action', array( $this, 'add_stamp_position' ), 10, 6 );
 	}
 	
 	/**
@@ -172,6 +173,56 @@ class DX_Form_Filters {
 		}
 	}
 	
+	/**
+	 * Add field for displaying Position of stamp 
+	 * 
+	 * @param $type field type (text, dx_invoicer_form_field, select, textarea...)
+	 * @param $item the item name
+	 * @param $attributes array with attributes
+	 * @param $method HTTP method where data is stored
+	 * @param $section_prefix a prefix for the section, if any
+	 * @param $id_prefix a prefix for IDs, if any
+	 */
+	public function add_stamp_position( $type, $item, $attributes, $method, $section_prefix, $id_prefix ) {
+		if( $type == 'stamp_position' ) {
+			//extract( $attributes );
+			extract( array_merge ($attributes, DX_Form_Helper::get_element_attributes( $item, $attributes, $method ) ) );
+			$label = !empty($label)	? $label	:"";
+		    $type  = !empty($type)	? $type		:"";
+		    $name  = !empty($name)	? $name		:"";
+		    $value = !empty($value)	? $value	:"";
+		    $text  = !empty($text)	? $text		:"";
+		    $id    = !empty($id)	? $id		:"";
+		    $class = !empty($class)	? $class	:"";
+		    $style = !empty($style)	? $style	:"";
+			$initial_rows = 0;
+			$current_user_id = get_current_user_id();
+
+			ob_start();
+			?>
+			<tr>
+				<th scope="row">
+					<label for="<?php echo $id_prefix . $id ?>"><?php echo $text ?></label>	
+				</th>
+				<td>
+				<div class="stamp-radio">
+					<input type="radio" id="radio1" name="<?php echo $name ?>" value="30" <?php echo ($value == 30)? "checked" :""; ?> >
+					<label for="radio1">Left</label>
+					<input type="radio" id="radio2" name="<?php echo $name ?>" value="90" <?php echo ($value == 90)? "checked" :""; ?> >
+					<label for="radio2">Center</label>
+					<input type="radio" id="radio3" name="<?php echo $name ?>" value="150" <?php echo ($value == 150)? "checked" :""; ?> >
+					<label for="radio3">Right</label>
+				</div>
+					<br />
+					<span class="description"><?php echo __( 'Select Stamp position.', 'dxinvoice' ) ?></span>
+				</td>
+			 </tr>
+			<?php 
+			$output = ob_get_clean();
+			echo apply_filters( 'dx_invoice_filter_invoices_table', $output );
+		}
+	}
+	
 	
 	/**
 	 * Add field for displaying customers on the Invoice form 
@@ -204,21 +255,22 @@ class DX_Form_Filters {
 			$files= DX_INV_DIR."/helpers/page-single-invoice";
 			$dir = "";
 			$pred = scandir($files);
-			 foreach ($pred as $key => $value)
+			 foreach ($pred as $key => $rowvalue)
 			   {
-			      if (!in_array($value,array(".","..")))
+			      if (!in_array($rowvalue,array(".","..")))
 			      {
-			         if (is_dir($dir . DIRECTORY_SEPARATOR . $value))
+			         if (is_dir($dir . DIRECTORY_SEPARATOR . $rowvalue))
 			         {
-			            $result[$value] = dirToArray($dir . DIRECTORY_SEPARATOR . $value);
+			            $result[$rowvalue] = dirToArray($dir . DIRECTORY_SEPARATOR . $rowvalue);
 			         }
 			         else
 			         {
-			            $result[] = $value;
+			            $result[] = $rowvalue;
 			         }
 			      }
 			   } 
 			ob_start();
+			
 			?>
 			<tr>
 				<th scope="row">
@@ -228,7 +280,7 @@ class DX_Form_Filters {
 						<option id="dx_empty_customer" value=""><?php _e('Pick an existing template', 'dxinvoice'); ?></option>						
 						<?php
 							foreach($result as $singlefile){ ?>
-								<option id="dx_template" value="<?php echo $singlefile; ?>" <?php echo ($singlefile == $value ? 'selected' : '' ) ?>><?php echo $singlefile; ?></option>
+								<option value="<?php echo $singlefile; ?>" <?php if($singlefile == $value) {echo 'selected="selected"';}  ?>><?php echo $singlefile; ?></option>
 						<?php	} ?>
 					</select><br />
 					<span class="description"><?php echo __( 'Add template if not exist.', 'dxinvoice' ) ?></span>
