@@ -90,7 +90,7 @@ class DX_Customer_Class {
 				
 				if( is_serialized( $custom_value ) ) {
 					// I don't like the @ either, but sometimes it's just making the output safe.
-					$custom_value = @unserialize( $custom_value );
+					$custom_value = maybe_unserialize( $custom_value );
 					if( is_array( $custom_value ) ) {
 						$custom_value = $custom_value[0];
 					}
@@ -164,5 +164,115 @@ class DX_Customer_Class {
 		}
 		
 		return $results;
+	}
+	/**
+	 * Add Column in listing invoice
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 */
+	function add_customer_invoice_column($columns) {
+		return array_merge( $columns, 
+      	array('_total_invoice' => __('Total Invoice','dxinvoice'),
+          	 '_total_invoice_amount' => __('Total Invoice Amount','dxinvoice')));
+	}
+	/**
+	 * Get Total of Invoice
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 */
+
+	function dx_display_customer_invoice_total( $column, $post_id ) {
+		global $wpdb ;
+	    switch ( $column ) {
+		case '_total_invoice' :
+		   		
+		   		 $querystr = "
+			    SELECT $wpdb->posts.* 
+			    FROM $wpdb->posts, $wpdb->postmeta
+			    WHERE $wpdb->posts.ID = $wpdb->postmeta.post_id 
+			    AND $wpdb->postmeta.meta_key = '_client' 
+			    AND $wpdb->postmeta.meta_value = $post_id 
+			    AND $wpdb->posts.post_status = 'publish' 
+			    AND $wpdb->posts.post_type = 'dx_invoice'
+			    ORDER BY $wpdb->posts.post_date DESC
+			 ";
+		   		 $pageposts = $wpdb->get_results($querystr, OBJECT);
+		    	 echo count($pageposts);
+		   		 break;
+		
+		case '_total_invoice_amount' :
+		   		 
+		   		 $querystr = "
+			    SELECT $wpdb->posts.* 
+			    FROM $wpdb->posts, $wpdb->postmeta
+			    WHERE $wpdb->posts.ID = $wpdb->postmeta.post_id 
+			    AND $wpdb->postmeta.meta_key = '_client' 
+			    AND $wpdb->postmeta.meta_value = $post_id 
+			    AND $wpdb->posts.post_status = 'publish' 
+			    AND $wpdb->posts.post_type = 'dx_invoice'
+			    ORDER BY $wpdb->posts.post_date DESC
+			 ";
+		   		 $pageposts = $wpdb->get_results($querystr, OBJECT);
+		    	
+			    $amount_invoice = array();
+			    foreach ( $pageposts as $key => $project ){
+			    	
+			    	$amount_invoice[] = get_post_meta($project->ID,'_amount',true);
+			    }
+		   		
+			   	echo array_sum($amount_invoice);
+		   		 break;
+	    }
+	}
+	
+	/**
+	 * Add Customer Setting
+	 /**
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 */
+	public function dx_customer_add_menu_page() { 
+		
+		//$dx_invoice_settings = add_menu_page( __( 'Customer Settings', 'dxinvoice' ), __( 'Customer Settings', 'dxinvoice' ), 'manage_options','dx_customer_settings', array($this, 'dx_customer_settings') );
+	    //add_action( "admin_head-$dx_invoice_settings", array( $this, 'dx_invoice_settings_scripts' ) );
+	}
+	 
+	/**
+	 * Include setting page
+	 /**
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 */
+	public function dx_customer_settings(){
+		include_once DX_INV_DIR.'/helpers/customer-settings.php';
+	}
+	
+	/**
+	 * Register setting Option
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 */
+	public function dx_customer_admin_init() {
+		
+		register_setting( 'customer_plugin_options', 'dx_customer_options' );
+		
+	}
+	/**
+	 * Customer Column sortable
+	 * 
+	 * Handles to filter the data by customer
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 **/
+	
+	public function dx_cus_register_column_sortable($newcolumn) {
+		  
+		$newcolumn['_total_invoice']  = 'customer';
+		$newcolumn['_total_invoice_amount']  = 'invoiceamount';
+		return $newcolumn;
 	}
 }

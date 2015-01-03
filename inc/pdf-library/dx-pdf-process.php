@@ -9,8 +9,9 @@ if ( !defined( 'ABSPATH' ) ) exit;
 	$post_id = isset($_REQUEST['post_ID'])?$_REQUEST['post_ID']:"";
 	$post_status = get_post_status( $post_id ) ;
 	 if("auto-draft" == $post_status){
-	 	echo "Please save post before invoice.";
-	 	exit;
+	 	echo "Please save post before Generate Invoice.";
+	 	$dx_listinvoice = add_query_arg( array( 'post_type' => DX_INV_POST_TYPE),admin_url('edit.php'));
+	 	wp_die('<a href="'.$dx_listinvoice.'">List Invoice</a>');
 	 }
 	$postdata = get_post($post_id);
 	// Get Invoice Detail
@@ -30,7 +31,8 @@ if ( !defined( 'ABSPATH' ) ) exit;
 	$dx_top_custom_value = $dx_custom['dx_invoice_items'][0];
 	$templates = isset($dx_custom['_page_templates'][0])?$dx_custom['_page_templates'][0]:"";
 	if( is_serialized( $dx_top_custom_value ) ) {
-		$dx_top_custom_value = @unserialize( $dx_top_custom_value );
+		//$dx_top_custom_value = @unserialize( $dx_top_custom_value );
+		$dx_top_custom_value = maybe_unserialize( $dx_top_custom_value );
 	}
 	$dx_stamp_position			=  isset($dx_stamp_position[0])	? $dx_stamp_position[0] :"";
 	// Invoice Detail
@@ -171,7 +173,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 	
 	//Close and output PDF document
 	//Second Parameter I that means display direct and D that means ask download or open this file
-	$pdf->Output( 'pdf-generater-' . date('Y-m-d') . '.pdf', 'I' );
+	$pdf->Output( 'pdf-generater-' . date('Y-m-d') . '.pdf', $pdf_view_type );
 	exit;
 
 

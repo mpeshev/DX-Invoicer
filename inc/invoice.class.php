@@ -113,6 +113,30 @@ class DX_Invoice_Class {
 	}
 	
 	/**
+ * Message Filter
+ *
+ * Add filter to ensure the text Review, or review, 
+ * is displayed when a user updates a custom post type.
+ *
+ * @package Poll
+ * @since 1.0.0
+ */  
+function dx_updated_messages( $messages ) {
+		
+	global $post, $post_ID;
+
+	$messages[DX_INV_POST_TYPE] = array(
+		0 => '', // Unused. Messages start at index 1.
+		1 => sprintf( __( 'Invoice updated.', 'dxinvoice' )),
+		2 => __( 'Custom field updated.', 'dxinvoice' ),
+		3 => __( 'Custom field deleted.', 'dxinvoice' ),
+		4 => __( 'Invoice updated.', 'dxinvoice' ),
+	);
+
+	return $messages;
+}
+
+	/**
 	 * Register function for the meta box for Invoice CPT
 	 */
 	public static function register_invoice_custom_meta( ) {
@@ -143,7 +167,7 @@ class DX_Invoice_Class {
 		// Try to fetch existing items values
 		$items_values = array();
 		if( ! empty( $custom['dx_invoice_items'] ) && is_array( $custom['dx_invoice_items'] ) ) {
-			$items_values = @unserialize($custom['dx_invoice_items'][0]);
+			$items_values = maybe_unserialize($custom['dx_invoice_items'][0]);
 		}
 		
 	?>
@@ -173,7 +197,7 @@ class DX_Invoice_Class {
 				$custom_value = $custom[$key][0];
 				if( is_serialized( $custom_value ) ) {
 					// I don't like the @ either, but sometimes it's just making the output safe.
-					$custom_value = @unserialize( $custom_value );
+					$custom_value = maybe_unserialize( $custom_value );
 					if( is_array( $custom_value ) ) {
 						$custom_value = $custom_value[0];
 					}
@@ -188,7 +212,7 @@ class DX_Invoice_Class {
 					// Check existing		
 						$my_query = new WP_Query( 
 						    array(
-						      'post_type' => 'dx_invoice',
+						      'post_type' => DX_INV_POST_TYPE,
 						      'post__not_in'=> array($post->ID),
 						      'meta_query' => array(
 						        array(
@@ -255,7 +279,7 @@ class DX_Invoice_Class {
 			// Checking post invoice number
 			$my_query = new WP_Query( 
 			    array(
-			      'post_type' => 'dx_invoice',
+			      'post_type' => DX_INV_POST_TYPE,
 			      'post__not_in'=> array($post_id),
 			      'meta_query' => array(
 			        array(
@@ -322,7 +346,7 @@ class DX_Invoice_Class {
 	}
 	
 	 /**
-	 * Add menu/Submenu
+	 * Add Invoice Setting
 	 /**
 	 * @package DX Invoice
 	 * @since 1.0.0
@@ -377,16 +401,14 @@ class DX_Invoice_Class {
 	function dx_top_form_edit( $post ) {
 		$preview = "";
 		$preview1 = "";
-	    if( 'dx_invoice' == $post->post_type ){
-	       $preview = add_query_arg( array( 'post_type' => $post->post_type, 'dx_action_validate' => 'generate-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' ) ); 
-	       $preview1 = add_query_arg( array( 'post_type' => $post->post_type, 'dx_action_validate' => 'download-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' ) ); 
-	        echo '	<input type="hidden" name="dx_action_validate" value="0">
-	        		<input type="hidden" name="dx_action" value="generate-pdf">
-	        		<a type="submit" class="dx-pdf-generate button" id="" href="'.$preview.'">'.__('Generate Preview','dxinvoice').'</a>
+	    if( DX_INV_POST_TYPE == $post->post_type ){
+	       $preview = add_query_arg( array( 'post_type' => DX_INV_POST_TYPE, 'dx_action_validate' => 'generate-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' ) ); 
+	       $preview1 = add_query_arg( array( 'post_type' => DX_INV_POST_TYPE, 'dx_action_validate' => 'download-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' ) ); 
+	        echo '	
+	        		<a type="submit" class="dx-pdf-generate button" id="" href="'.$preview.'">'.__('Preview Invoice','dxinvoice').'</a>
 	        	';
-	        echo '	<input type="hidden" name="dx_action_validate" value="0">
-	        		<input type="hidden" name="dx_action" value="download-pdf">
-	        		<a type="submit" class="dx-pdf-generate button" id="" href="'.$preview1.'">'.__('Download','dxinvoice').'</a>
+	        echo '	
+	        		<a type="submit" class="dx-pdf-generate button" id="" href="'.$preview1.'">'.__('Download Invoice','dxinvoice').'</a>
 	        	';
 	    }
 	}
@@ -397,20 +419,152 @@ class DX_Invoice_Class {
 	 * @since 1.0.0
 	 */		
 	function dx_pdf_form_load(){
+		
 		$post_id = isset($_REQUEST['post_ID'])?$_REQUEST['post_ID']:"";
 		$action = isset($_REQUEST['dx_action'])?$_REQUEST['dx_action']:"";
 		$action_validate = isset($_REQUEST['dx_action_validate'])?$_REQUEST['dx_action_validate']:"";
 		
 		if($action_validate == 'generate-pdf' ){
+			// I for preview
+			$pdf_view_type = 'I';
 			//include_once DX_INV_DIR.'/inc/pdf-library/pdf-template-generate.php';
 			include_once DX_INV_DIR.'/inc/pdf-library/dx-pdf-process.php';
 			//dx_invoice_to_pdf();
 		}
 		if($action_validate == 'download-pdf' ){
+			// D for download
+			$pdf_view_type = 'D';
 			//include_once DX_INV_DIR.'/inc/pdf-library/pdf-template-generate.php';
-			include_once DX_INV_DIR.'/inc/pdf-library/dx-pdf-process-download.php';
+			include_once DX_INV_DIR.'/inc/pdf-library/dx-pdf-process.php';
 			//dx_invoice_to_pdf();
 		}
 	}
+	
+	/**
+	 * Add Column in listing invoice
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 */
+	function add_invoice_column($columns) {
+		//return array_merge( $columns, 
+      	//array('_customer_name' => 'Customer',
+          	 //'_invoice_amount' => 'Invoice Amount'));
+          	 $columns['_customer_name'] = 'Customer';
+          	 $columns['_invoice_amount'] = 'Invoice Amount';
+          	 return $columns;
+	}
+	
+	/**
+	 * Filter Column in listing invoice
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 */
+
+	function dx_display_posts( $column, $post_id ) {
+	    switch ( $column ) {
+		case '_customer_name' :
+		   		 $customer_id 	= 	get_post_meta($post_id,'_client',true);
+			   	if(!empty($customer_id)){
+		   			echo get_the_title( $customer_id );
+			   	}
+		   		 break;
+		case '_invoice_amount' :
+			    echo get_post_meta( $post_id , '_amount' , true ); 
+		    	break;
+	    }
+	}
+	/**
+	 * Filter By Customer
+	 * 
+	 * Handles to filter the data by customer
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 **/
+	public function dx_invoice_restrict_manage_posts() {
+		
+		$post_type = isset($_REQUEST['post_type'])?$_REQUEST['post_type']:"";
+		
+		if ( $post_type == DX_INV_POST_TYPE ) {
+			$html = '';
+			$customer_id 	  = isset( $_GET['customer_id'] ) ? $_GET['customer_id'] : '';
+			$customers_query = new WP_Query(array(
+					'post_type' => 'dx_customer',
+					'order' => 'ASC',
+					'orderby' => 'title'
+			));
+			ob_start();
+			?>		
+				<select name="customer_id" id="<?php echo the_ID(); ?>">
+					<option id="dx_empty_customer" value=""><?php _e('Select Customer', 'dxinvoice'); ?></option>
+					<?php while( $customers_query->have_posts() ):
+							$customers_query->the_post(); ?>
+					<option id="customer_<?php the_ID(); ?>" value="<?php the_ID(); ?>" <?php echo (get_the_ID() == $customer_id ? 'selected' : '' ) ?>><?php echo the_title(); ?></option>
+					<?php endwhile;
+						wp_reset_postdata();
+					?>
+				</select>
+			<?php
+			$html .= ob_get_clean();
+			echo  $html;
+	    }
+	}
+	/**
+	 * Handle Filter By Customer
+	 * 
+	 * Handles to filter the data by customer
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 **/
+	public function dx_invoice_pre_get_post($query){
+		global $wpdb;
+		if ( isset( $_GET['customer_id'] ) && !empty( $_GET['customer_id'] ) ) {
+	
+			$customer_id = $_GET['customer_id'];
+
+			if ( $query->is_main_query() ) {
+		        $query->set( 'meta_key', '_client' );       
+		        $query->set( 'meta_value', $customer_id );       
+		    }
+		}
+	}
+	/**
+	 * Invoice PDF preview option
+	 * 
+	 * Handles to filter the data by customer
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 **/
+	
+	public function dx_invoice_row_actions($actions) {
+		global $post;
+		
+		if ( $post->post_type != DX_INV_POST_TYPE ) {
+	        return $actions;
+	    }
+		$dx_view_pdf = '<a href="'.add_query_arg( array( 'post_type' => DX_INV_POST_TYPE, 'dx_action_validate' => 'generate-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' )).'">View PDF</a>';
+	    $actions['view_pdf'] = $dx_view_pdf;
+	    return $actions;
+	}
+	/**
+	 * Invoice Column sortable
+	 * 
+	 * Handles to filter the data by customer
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 **/
+	
+	public function dx_inv_register_column_sortable($newcolumn) {
+		  
+		$newcolumn['_customer_name']  = 'customer';
+		$newcolumn['_invoice_amount']  = 'invoiceamount';
+		return $newcolumn;
+	}			
+
 	
 }

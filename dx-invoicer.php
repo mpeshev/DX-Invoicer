@@ -16,6 +16,15 @@ if( !defined( 'DX_INV_DIR' ) ) {
 if( !defined( 'DX_INV_URL' ) ) {
 	define( 'DX_INV_URL', plugin_dir_url( __FILE__ ) ); // plugin dir
 }
+if( !defined( 'DX_INV_POST_TYPE' ) ) {
+	define( 'DX_INV_POST_TYPE', 'dx_invoice' ); // plugin dir
+}
+if( !defined( 'DX_CUSTOMER_POST_TYPE' ) ) {
+	define( 'DX_CUSTOMER_POST_TYPE', 'dx_customer' ); // plugin dir
+}
+if( !defined( 'DX_PREFIX' ) ) {
+	define( 'DX_PREFIX', 'dx_' ); // plugin dir
+}
 
 if( !class_exists( 'DX_Invoicer' ) ) {
 	class DX_Invoicer {
@@ -68,12 +77,12 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 				
 				wp_enqueue_script( 'dx-invoicer-post-screens', plugins_url( '/js/dx-invoicer-post-screens.js', __FILE__ ), array( 'jquery' ) );
 				wp_enqueue_script( 'dx-invoicer-admin', plugins_url( '/js/dx-invoicer-admin.js', __FILE__ ), array( 'jquery' ) );
-			} else if( $hook == 'dx-invoicer' || $hook == 'toplevel_page_dx_invoice_settings') { // TODO: is this a valid hook?
+			} else if( $hook == 'dx-invoicer') { // TODO: is this a valid hook?
 				wp_enqueue_style( 'dx-invoicer-admin', plugins_url( '/css/dx-invoicer-admin.css', __FILE__ ), array(), '1.0', 'screen' );
 				wp_enqueue_script( 'dx-invoicer-admin', plugins_url( '/js/dx-invoicer-admin.js', __FILE__ ), array( 'jquery' ) );
+				
 				//wp_localize_script( 'dx-invoicer-admin','DXINVOICE',array( 'ajaxurl'=>	admin_url( 'admin-ajax.php', ( is_ssl() ? 'https' : 'http' ) ) ));
 			}
-			
 			$hook_file = array('post.php','toplevel_page_dx_invoice_settings','post-new.php');
 			if(in_array($hook,$hook_file)){ 
 				wp_enqueue_script('postbox');
@@ -88,6 +97,12 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 				wp_localize_script( 'dx-invoicer-upload', 'DxImgSettings', array( 'new_media_ui'	=>	$newui	));
 				//for new media uploader
 				wp_enqueue_media();
+			}
+			$dx_setting_page = array('toplevel_page_dx_customer_settings','toplevel_page_dx_invoice_settings');
+			if(in_array($hook,$dx_setting_page)){
+				wp_enqueue_script('postbox');
+				wp_enqueue_style( 'dx-invoicer-admin', plugins_url( '/css/dx-invoicer-admin.css', __FILE__ ), array(), '1.0', 'screen' );
+				wp_enqueue_script( 'dx-invoicer-customer-setting', plugins_url( '/js/dx-invoicer-customer-setting.js', __FILE__ ), array( 'jquery' ) );
 			}
 		}
 
@@ -104,7 +119,7 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 		
 		public function register_cpts() {
 			global $dx_customer_instance, $dx_invoice_instance;
-			
+			$post_type = DX_INV_POST_TYPE;
 			add_action( 'init', array( $dx_invoice_instance, 'register_invoice_cpt' ), 10 );
 			add_action( 'init', array( $dx_customer_instance, 'register_customer_cpt' ), 10 );
 			
@@ -115,13 +130,25 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 			add_action( 'save_post', array( $dx_customer_instance, 'save_customer_post' ) );
 			
 			add_action('admin_init',array($dx_invoice_instance,'dx_invoice_admin_init'));
+			add_action('admin_init',array($dx_customer_instance,'dx_customer_admin_init'));
 			add_action('admin_menu',array($dx_invoice_instance, 'dx_invoice_add_menu_page'));
+			add_action('admin_menu',array($dx_customer_instance, 'dx_customer_add_menu_page'));
 			//add_action('admin_menu',array($dx_invoice_instance, 'invoice_detail'));
 			add_action( 'admin_notices', array($dx_invoice_instance, 'dx_invoice_error_notice' ));
 			add_action( 'edit_form_top', array($dx_invoice_instance,'dx_top_form_edit' ));
 			add_action( 'init', array($dx_invoice_instance,'dx_pdf_form_load') );
-			
-			
+			add_filter( 'post_updated_messages', array($dx_invoice_instance,'dx_updated_messages') );
+			add_filter('manage_'.DX_INV_POST_TYPE.'_posts_columns' ,  array($dx_invoice_instance,'add_invoice_column'));
+			add_filter('manage_'.DX_CUSTOMER_POST_TYPE.'_posts_columns' ,  array($dx_customer_instance,'add_customer_invoice_column'));
+			add_action( 'manage_posts_custom_column' , array($dx_invoice_instance,'dx_display_posts'), 10, 2 );
+			add_action( 'manage_posts_custom_column' , array($dx_customer_instance,'dx_display_customer_invoice_total'), 10, 2 );
+			// Add category filter in Invoice list page
+			add_action( 'restrict_manage_posts', array( $dx_invoice_instance, 'dx_invoice_restrict_manage_posts' ) );
+			// Add action for display deals using deal type
+			add_filter( 'pre_get_posts', array( $dx_invoice_instance, 'dx_invoice_pre_get_post' ));
+			add_filter( 'post_row_actions', array( $dx_invoice_instance, 'dx_invoice_row_actions' ));
+			add_filter( 'manage_edit-'.DX_INV_POST_TYPE.'_sortable_columns', array($dx_invoice_instance,'dx_inv_register_column_sortable' ));
+			 add_filter( 'manage_edit-'.DX_CUSTOMER_POST_TYPE.'_sortable_columns', array($dx_customer_instance,'dx_cus_register_column_sortable' ));
 			
 		}
 		
