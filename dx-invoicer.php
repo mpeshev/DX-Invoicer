@@ -1,8 +1,13 @@
 <?php
 /**
  * Plugin Name: DX Invoicer
+ * Plugin URI: http://devrix.com
  * Description: Invoice manager for WordPress, includes user and invoice management, templating and exports
+ * Author: DevriX
+ * Author URI: http://devrix.com
  * Version: 0.1
+ * Text Domain: dxinvoice
+ * Domain Path: /languages
  * License: GPLv2
  * 
  */
