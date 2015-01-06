@@ -354,16 +354,37 @@ function dx_updated_messages( $messages ) {
 	public function dx_invoice_add_menu_page() { 
 		
 		$dx_invoice_settings = add_menu_page( __( 'Invoice Settings', 'dxinvoice' ), __( 'Invoice Settings', 'dxinvoice' ), 'manage_options','dx_invoice_settings', array($this, 'dx_invoice_settings') );
-	    //add_action( "admin_head-$dx_invoice_settings", array( $this, 'dx_invoice_settings_scripts' ) );
+		$dx_invoice_settings = add_menu_page( __( 'Google Contact', 'dxinvoice' ), __( 'Google Contact', 'dxinvoice' ), 'manage_options','dx_invoice_google_settings', array($this, 'dx_invoice_google_settings') );
+		add_submenu_page( 'dx_invoice_google_settings',  __( 'Outlook Contact', 'dxinvoice' ), __( 'Outlook Contact', 'dxinvoice' ), 'manage_options', 'dx_invoice_outlook_settings', array($this, 'dx_invoice_outlook_contact') );
+
+		//add_action( "admin_head-$dx_invoice_settings", array( $this, 'dx_invoice_settings_scripts' ) );
 	}
 	 /**
 	 * Add menu/Submenu
-	 /**
+	 *
 	 * @package DX Invoice
 	 * @since 1.0.0
 	 */
 	public function dx_invoice_settings(){
 		include_once DX_INV_DIR.'/helpers/invoice-settings.php';
+	}
+	/**
+	 * Add menu/Submenu
+	 *
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 */
+	public function dx_invoice_google_settings(){
+		include_once DX_INV_DIR.'/helpers/invoice-google-settings.php';
+	}
+	/**
+	 * Add menu/Submenu
+	 *
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 */
+	public function dx_invoice_outlook_contact	(){
+		include_once DX_INV_DIR.'/helpers/invoice-outlook-settings.php';
 	}
 		
 	/**
@@ -564,7 +585,94 @@ function dx_updated_messages( $messages ) {
 		$newcolumn['_customer_name']  = 'customer';
 		$newcolumn['_invoice_amount']  = 'invoiceamount';
 		return $newcolumn;
-	}			
-
+	}
+	/**
+	 * Outlook Data Event receive and redirect
+	 * 
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 **/
 	
+	public function dx_inv_outlook_data($newcolumn) {
+		  
+			$outlook_request = isset($_GET['code'])?$_GET['code']:"";
+			
+			$dx_invoice_options 	= get_option( 'dx_invoice_options' );
+			$dx_outlook_client_id 	= isset($dx_invoice_options['dx_outlook_client_id'])?$dx_invoice_options['dx_outlook_client_id']:"";
+			$dx_outlook_client_secret= isset($dx_invoice_options['dx_outlook_client_secret'])?$dx_invoice_options['dx_outlook_client_secret']:"";
+			$dx_outlook_callback_url	= isset($dx_invoice_options['dx_outlook_callback_url'])?$dx_invoice_options['dx_outlook_callback_url']:"";
+			
+			if(!empty($outlook_request)){
+			$auth_code = $_GET["code"];
+			$fields=array(
+				'code'=>  urlencode($auth_code),
+				'client_id'=>  urlencode($client_id),
+				'client_secret'=>  urlencode($client_secret),
+				'redirect_uri'=>  urlencode($redirect_uri),
+				'grant_type'=>  urlencode('authorization_code')
+			);
+			$post = '';
+			foreach($fields as $key=>$value) { $post .= $key.'='.$value.'&'; }
+			$post = rtrim($post,'&');
+			$curl = curl_init();
+			curl_setopt($curl,CURLOPT_URL,'https://login.live.com/oauth20_token.srf');
+			curl_setopt($curl,CURLOPT_POST,5);
+			curl_setopt($curl,CURLOPT_POSTFIELDS,$post);
+			curl_setopt($curl, CURLOPT_RETURNTRANSFER,TRUE);
+			curl_setopt($curl, CURLOPT_SSL_VERIFYPEER,0);
+			$result = curl_exec($curl);
+			curl_close($curl);
+			$response =  json_decode($result);
+			$accesstoken = isset($response->access_token)?$response->access_token:"";
+			$url = 'https://apis.live.net/v5.0/me/contacts?access_token='.$accesstoken.'&limit=100';
+			$xmlresponse =  $this->curl_file_get_contents($url);
+			$xmldata = json_decode($xmlresponse, true);
+			$_SESSION['outlook'] = $xmldata;
+			wp_redirect(admin_url('admin.php?page=dx_customer_settings'));
+			exit;
+		}
+	}
+	
+	/**
+	 * Outlook Data HTML EVENT
+	 * 
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 *
+	 */
+	
+	function curl_file_get_contents($url) {
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_AUTOREFERER, TRUE);
+		curl_setopt($ch, CURLOPT_HEADER, 0);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+		$data = curl_exec($ch);
+		curl_close($ch);
+		return $data;
+	}
+	/**
+	 * Get auth url for windows live
+	 *
+	 * @param Social Deals Engine
+	 * @since 1.0.0
+	 */	
+	public function dx_get_windowslive_auth_url () {
+		$dx_invoice_options 	= get_option( 'dx_invoice_options' );
+		$dx_outlook_client_id 	= isset($dx_invoice_options['dx_outlook_client_id'])?$dx_invoice_options['dx_outlook_client_id']:"";
+		$dx_outlook_client_secret= isset($dx_invoice_options['dx_outlook_client_secret'])?$dx_invoice_options['dx_outlook_client_secret']:"";
+		$dx_outlook_callback_url	= isset($dx_invoice_options['dx_outlook_callback_url'])?$dx_invoice_options['dx_outlook_callback_url']:"";
+		$dx_authurl = add_query_arg( array(	
+											'client_id'		=>	$dx_outlook_client_id,
+											'scope'			=>	'wl.signin+wl.basic+wl.emails+wl.contacts_emails',
+											'response_type'	=>	'code',
+											'redirect_uri'	=>	$dx_outlook_callback_url
+										),
+									'https://login.live.com/oauth20_authorize.srf' );
+		return $dx_authurl;
+		
+	}
 }

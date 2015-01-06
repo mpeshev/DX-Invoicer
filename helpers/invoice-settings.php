@@ -1,6 +1,6 @@
 <?php
 /**
- * Global Desclaimer/Rules page settings
+ * Invoice settings
  */
 
 // Exit if accessed directly
@@ -43,17 +43,22 @@ if ( !defined( 'ABSPATH' ) ) exit;
 			      }
 			   } 
 			settings_fields( 'invoice_plugin_options' );
-			$dx_invoice_options = get_option( 'dx_invoice_options' );
-			$invoice_current = isset($dx_invoice_options['invoice_num'])?$dx_invoice_options['invoice_num']:"";
-			$invoice_increment = isset($dx_invoice_options['increment'])?$dx_invoice_options['increment']:"";
-			$invoice_stamp = isset($dx_invoice_options['stamp'])?$dx_invoice_options['stamp']:"";
-			$invoice_signature = isset($dx_invoice_options['signature'])?$dx_invoice_options['signature']:"";
-			$invoice_page_template = isset($dx_invoice_options['page_template'])?$dx_invoice_options['page_template']:"";
+			$dx_invoice_options 		= get_option( 'dx_invoice_options' );
+			$invoice_current 			= isset($dx_invoice_options['invoice_num'])?$dx_invoice_options['invoice_num']:"";
+			$invoice_increment 			= isset($dx_invoice_options['increment'])?$dx_invoice_options['increment']:"";
+			$invoice_stamp 				= isset($dx_invoice_options['stamp'])?$dx_invoice_options['stamp']:"";
+			$invoice_signature 			= isset($dx_invoice_options['signature'])?$dx_invoice_options['signature']:"";
+			$invoice_page_template 		= isset($dx_invoice_options['page_template'])?$dx_invoice_options['page_template']:"";
 			
-			/*	Customer data get		*/
-			$dx_google_client_id 	= isset($dx_invoice_options['dx_google_client_id'])?$dx_invoice_options['dx_google_client_id']:"";
-			$dx_google_client_secret= isset($dx_invoice_options['dx_google_client_secret'])?$dx_invoice_options['dx_google_client_secret']:"";
-			$dx_google_callback_url	= isset($dx_invoice_options['dx_google_callback_url'])?$dx_invoice_options['dx_google_callback_url']:"";
+			/*	Customer Google Contact get		*/
+			$dx_google_client_id		= isset($dx_invoice_options['dx_google_client_id'])?$dx_invoice_options['dx_google_client_id']:"";
+			$dx_google_client_secret	= isset($dx_invoice_options['dx_google_client_secret'])?$dx_invoice_options['dx_google_client_secret']:"";
+			$dx_google_callback_url		= isset($dx_invoice_options['dx_google_callback_url'])?$dx_invoice_options['dx_google_callback_url']:"";
+			
+			/*	Customer MSN Outlook Setting	*/
+			$dx_outlook_client_id 		= isset($dx_invoice_options['dx_outlook_client_id'])?$dx_invoice_options['dx_outlook_client_id']:"";
+			$dx_outlook_client_secret	= isset($dx_invoice_options['dx_outlook_client_secret'])?$dx_invoice_options['dx_outlook_client_secret']:"";
+			$dx_outlook_callback_url	= isset($dx_invoice_options['dx_outlook_callback_url'])?$dx_invoice_options['dx_outlook_callback_url']:"";
 			
 		?>
 		<!-- beginning of the settings meta box -->	
@@ -161,7 +166,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 			</div><!-- #wps-settings-general -->
 			
 		<!-- end of the settings meta box -->		
-		<?php /* ?>
+		
 		<!-- beginning of the settings meta box -->	
 			<div id="dx-customer-settings" class="post-box-container">
 			
@@ -225,8 +230,71 @@ if ( !defined( 'ABSPATH' ) ) exit;
 			</div><!-- #wps-settings-general -->
 			
 		<!-- end of the settings meta box -->		
+			<!-- beginning of the settings meta box -->	
+			<div id="dx-customer-settings" class="post-box-container">
+			
+				<div class="metabox-holder">	
+			
+					<div class="meta-box-sortables ui-sortable">
+			
+						<div id="settings" class="postbox">	
+			
+							<div class="handlediv" title="<?php echo __( 'Click to toggle', 'dxinvoice' ) ?>"><br /></div>
+			
+								<!-- settings box title -->					
+								<h3 class="hndle">					
+									<span style="vertical-align: top;"><?php echo __( 'Outlook Settings', 'dxinvoice' ) ?></span>					
+								</h3>
+			
+								<div class="inside">			
 
-	<?php */ ?>
+									<table class="form-table dx-customer-settings-box"> 
+										<tbody>
+											<tr>
+												<th scope="row">
+													<label for="dx-customer-settings-outlook-id"><strong><?php echo __( 'Outlook Client API ID', 'dxinvoice' ) ?></strong></label>
+												</th>
+												<td><input type="text" id="dx-customer-settings-outlook-id"  name="dx_invoice_options[dx_outlook_client_id]" value="<?php echo $dx_outlook_client_id; ?>" size="63" /><br />
+													<span class="description"><?php echo __( 'Enter Outlook Client API ID', 'dxinvoice' ) ?></span>
+												</td>
+											 </tr>
+											 <tr>
+												<th scope="row">
+													<label for="dx-customer-settings-outlook-secret"><strong><?php echo __( 'Outlook Client Secret', 'dxinvoice' ) ?></strong></label>
+												</th>
+												<td><input type="text" id="dx-customer-settings-outlook-secret" name="dx_invoice_options[dx_outlook_client_secret]" value="<?php echo $dx_outlook_client_secret; ?>" size="63" /><br />
+													<span class="description"><?php echo __( 'Enter Outlook Client Secret', 'dxinvoice' ) ?></span>
+												</td>
+											 </tr>
+											 <tr>
+												<th scope="row">
+													<label for="dx-customer-settings-outlook-callback"><strong><?php echo __( 'Callback URL ', 'dxinvoice' ) ?></strong></label>
+												</th>
+												<td><input type="text" id="dx-customer-settings-outlook-callback" name="dx_invoice_options[dx_outlook_callback_url]" value="<?php echo $dx_outlook_callback_url; ?>" size="63" /><br />
+													<span class="description"><?php echo __( 'Enter Outlook Callback URL', 'dxinvoice' ) ?></span>
+												</td>
+											 </tr>
+											<tr>
+												<td colspan="2">
+													<input type="submit" class="button-primary dx-customer-settings-save" name="dx_customer_settings_save" class="" value="<?php echo __( 'Save Changes', 'dxinvoice' ) ?>" />
+												</td>
+											</tr>
+										</tbody>
+									</table>
+						
+							</div><!-- .inside -->
+				
+						</div><!-- #settings -->
+			
+					</div><!-- .meta-box-sortables ui-sortable -->
+			
+				</div><!-- .metabox-holder -->
+			
+			</div><!-- #wps-settings-general -->
+			
+		<!-- end of the settings meta box -->		
+
+	
 	</form>	
 	
 </div><!-- end .wrap -->
