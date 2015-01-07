@@ -227,17 +227,6 @@ class DX_Customer_Class {
 	    }
 	}
 	
-	/**
-	 * Add Customer Setting
-	 /**
-	 * @package DX Invoice
-	 * @since 1.0.0
-	 */
-	public function dx_customer_add_menu_page() { 
-		
-		//$dx_invoice_settings = add_menu_page( __( 'Customer Settings', 'dxinvoice' ), __( 'Customer Settings', 'dxinvoice' ), 'manage_options','dx_customer_settings', array($this, 'dx_customer_settings') );
-	    //add_action( "admin_head-$dx_invoice_settings", array( $this, 'dx_invoice_settings_scripts' ) );
-	}
 	 
 	/**
 	 * Include setting page

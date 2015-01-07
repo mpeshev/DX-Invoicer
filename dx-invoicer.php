@@ -122,7 +122,7 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 			
 		}
 		
-		public function register_cpts() {
+		public function register_cpts() { 
 			global $dx_customer_instance, $dx_invoice_instance;
 			$post_type = DX_INV_POST_TYPE;
 			add_action( 'init', array( $dx_invoice_instance, 'register_invoice_cpt' ), 10 );
@@ -137,11 +137,12 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 			add_action('admin_init',array($dx_invoice_instance,'dx_invoice_admin_init'));
 			add_action('admin_init',array($dx_customer_instance,'dx_customer_admin_init'));
 			add_action('admin_menu',array($dx_invoice_instance, 'dx_invoice_add_menu_page'));
-			add_action('admin_menu',array($dx_customer_instance, 'dx_customer_add_menu_page'));
+			//add_action('admin_menu',array($dx_customer_instance, 'dx_customer_add_menu_page'));
 			//add_action('admin_menu',array($dx_invoice_instance, 'invoice_detail'));
 			add_action( 'admin_notices', array($dx_invoice_instance, 'dx_invoice_error_notice' ));
 			add_action( 'edit_form_top', array($dx_invoice_instance,'dx_top_form_edit' ));
 			add_action( 'init', array($dx_invoice_instance,'dx_pdf_form_load') );
+			add_action( 'init', array($dx_invoice_instance,'dx_inv_outlook_data') );
 			add_filter( 'post_updated_messages', array($dx_invoice_instance,'dx_updated_messages') );
 			add_filter('manage_'.DX_INV_POST_TYPE.'_posts_columns' ,  array($dx_invoice_instance,'add_invoice_column'));
 			add_filter('manage_'.DX_CUSTOMER_POST_TYPE.'_posts_columns' ,  array($dx_customer_instance,'add_customer_invoice_column'));
@@ -154,6 +155,13 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 			add_filter( 'post_row_actions', array( $dx_invoice_instance, 'dx_invoice_row_actions' ));
 			add_filter( 'manage_edit-'.DX_INV_POST_TYPE.'_sortable_columns', array($dx_invoice_instance,'dx_inv_register_column_sortable' ));
 			 add_filter( 'manage_edit-'.DX_CUSTOMER_POST_TYPE.'_sortable_columns', array($dx_customer_instance,'dx_cus_register_column_sortable' ));
+			  //add action to call ajax
+			add_action( 'wp_ajax_add_outlook_customer', array( $dx_customer_instance, 'add_outlook_customer' ));
+			add_action( 'wp_ajax_nopriv_add_outlook_customer',array( $dx_customer_instance,  'add_outlook_customer' ));
+			//add action to call ajax
+			add_action( 'wp_ajax_dx_invoice_update', array( $dx_invoice_instance, 'dx_invoice_update' ));
+			add_action( 'wp_ajax_nopriv_dx_invoice_update',array( $dx_invoice_instance,  'dx_invoice_update' ));
+			 	add_filter( 'template_include', array( $dx_invoice_instance,'dx_invoice_render_single'), 99 );
 			
 		}
 		

@@ -1,3 +1,4 @@
+$ = jQuery.noConflict();
 jQuery(document).ready(function($){ 
 	
 	$('.post-type-dx_invoice #publish').click(function(){ 
@@ -11,15 +12,24 @@ jQuery(document).ready(function($){
 			return true;
 		}
 	});
-	
-	/*$('.handlediv').click(function(){
-		$('#settings').toggleClass('closed');
-	});
-	*/
-	//$(".if-js-closed").removeClass("if-js-closed").addClass("closed");
-	
-	//postboxes.add_postbox_toggles( "dx-invoice-settings" );
 			
+	$('.button.green').click(function(){ 
+			var $id = $(this).attr('data-id');
+			var customer_name = $('#'+$id).find('[data-name]').data('name');
+			console.log(customer_name);
+			var data = {
+				customer_name : customer_name,
+				action		  : 'add_outlook_customer'
+			};
+			jQuery.post(DXINVOICE.ajaxurl,data,function(response) { 
+				
+				if(response){
+					$(this).removeClass('green');
+					$(this).addClass('red');
+					
+				}
+			});  
+	});
 	
 	$('.dx-invoice-settings-save').click(function(){
 		$invoice = $('#dx-invoice-settings-invoice').val();
@@ -44,4 +54,5 @@ jQuery(document).ready(function($){
 	$("#invoice-page-template").chosen();
 	
 	postboxes.add_postbox_toggles( "dx-customer-settings" );			
+		
 });

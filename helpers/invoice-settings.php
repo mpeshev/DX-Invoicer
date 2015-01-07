@@ -27,6 +27,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 		<?php
 			$files= DX_INV_DIR."/helpers/page-single-invoice";
 			$dir = "";
+			$dx_google_callback_url = add_query_arg( array( 'page' => 'dx_invoice_google_settings'), admin_url( 'admin.php' ) ); 
 			$pred = scandir($files);
 			 foreach ($pred as $key => $value)
 			   {
@@ -53,12 +54,13 @@ if ( !defined( 'ABSPATH' ) ) exit;
 			/*	Customer Google Contact get		*/
 			$dx_google_client_id		= isset($dx_invoice_options['dx_google_client_id'])?$dx_invoice_options['dx_google_client_id']:"";
 			$dx_google_client_secret	= isset($dx_invoice_options['dx_google_client_secret'])?$dx_invoice_options['dx_google_client_secret']:"";
-			$dx_google_callback_url		= isset($dx_invoice_options['dx_google_callback_url'])?$dx_invoice_options['dx_google_callback_url']:"";
+			//$dx_google_callback_url		= isset($dx_invoice_options['dx_google_callback_url'])?$dx_invoice_options['dx_google_callback_url']:"";
 			
 			/*	Customer MSN Outlook Setting	*/
 			$dx_outlook_client_id 		= isset($dx_invoice_options['dx_outlook_client_id'])?$dx_invoice_options['dx_outlook_client_id']:"";
 			$dx_outlook_client_secret	= isset($dx_invoice_options['dx_outlook_client_secret'])?$dx_invoice_options['dx_outlook_client_secret']:"";
-			$dx_outlook_callback_url	= isset($dx_invoice_options['dx_outlook_callback_url'])?$dx_invoice_options['dx_outlook_callback_url']:"";
+			//$dx_outlook_callback_url	= isset($dx_invoice_options['dx_outlook_callback_url'])?$dx_invoice_options['dx_outlook_callback_url']:"";
+			$dx_outlook_callback_url	= get_site_url();
 			
 		?>
 		<!-- beginning of the settings meta box -->	
@@ -207,8 +209,8 @@ if ( !defined( 'ABSPATH' ) ) exit;
 												<th scope="row">
 													<label for="dx-customer-settings-google-callback"><strong><?php echo __( 'Callback URL ', 'dxinvoice' ) ?></strong></label>
 												</th>
-												<td><input type="text" id="dx-customer-settings-google-callback" name="dx_invoice_options[dx_google_callback_url]" value="<?php echo $dx_google_callback_url; ?>" size="63" /><br />
-													<span class="description"><?php echo __( 'Enter Google Callback URL', 'dxinvoice' ) ?></span>
+												<td><input type="text" id="dx-customer-settings-google-callback" name="dx_invoice_options[dx_google_callback_url]" value="<?php echo $dx_google_callback_url; ?>"readonly size="63" /><br />
+													<span class="description"><?php echo __( 'Enter Google Callback URL e.g = http://wordpress.com/wp-admin/admin.php?page=dx_invoice_settings', 'dxinvoice' ) ?></span>
 												</td>
 											 </tr>
 											<tr>
@@ -270,8 +272,8 @@ if ( !defined( 'ABSPATH' ) ) exit;
 												<th scope="row">
 													<label for="dx-customer-settings-outlook-callback"><strong><?php echo __( 'Callback URL ', 'dxinvoice' ) ?></strong></label>
 												</th>
-												<td><input type="text" id="dx-customer-settings-outlook-callback" name="dx_invoice_options[dx_outlook_callback_url]" value="<?php echo $dx_outlook_callback_url; ?>" size="63" /><br />
-													<span class="description"><?php echo __( 'Enter Outlook Callback URL', 'dxinvoice' ) ?></span>
+												<td><input type="text" id="dx-customer-settings-outlook-callback" name="dx_invoice_options[dx_outlook_callback_url]" value="<?php echo $dx_outlook_callback_url; ?>" readonly size="63" /><br />
+													<span class="description"><?php echo __( 'Site URL', 'dxinvoice' ) ?></span>
 												</td>
 											 </tr>
 											<tr>

@@ -20,23 +20,23 @@ $dx_invoice_detail = '<table width="100%" border="0" style="padding:5px; ">
       	</tbody></table>';
 
 $client_detail = '<table style="padding:5px;">
-				    <tbody><tr class="client-title"><td>'. $dx_customer_name.'</td></tr>
-				    <tr style="font-size:38px; color:#7F7F7F;"><td ><b>'.$dx_company_name.'</b></td></tr>
-				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF"><b>'. __('Address:','dxinvoice').'</b>
-				'.$dx_company_address.'</td></tr>
-				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF">'. __('ID No.:','dxinvoice'). $dx_company_number.'</td></tr>
-				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF">'. __('Contant Person','dxinvoice').' : '.$dx_client_name.'</td></tr>
+				    <tbody><tr class="client-title"><td class="changable-text" data-clientname="'.$dx_client.'">'. $dx_customer_name.'</td></tr>
+				    <tr style="font-size:38px; color:#7F7F7F;"><td><b class="changable-text" data-clientcompany >'.$dx_company_name.'</b></td></tr>
+				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF"><b>'. __('Address:','dxinvoice').'</b><span class="changable-textarea" data-clientcomaddr> 
+				'.$dx_company_address.'</span></td></tr>
+				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF">'. __('ID No.:','dxinvoice').'<span class="changable-text" data-clientcomnum>'. $dx_company_number.'</span></td></tr>
+				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF">'. __('Contant Person','dxinvoice').' :<span class="changable-text" data-contactperson > '.$dx_client_name.'</span></td></tr>
 				  </tbody>
 				</table>';
 
 $customer_detail = '<table style="padding:5px;">
 				    <tbody><tr style="padding:10px 0;" class="client-title">
-				    <td>'. __('Supplier','dxinvoice').'</td></tr>
-				    <tr style="font-size:38px;"><td style="padding:10px 0; color:#7F7F7F;"><b>WP Valet LLC</b></td></tr>
+				    <td class="changable-text" data-customername>'. __('Supplier','dxinvoice').'</td></tr>
+				    <tr style="font-size:38px;"><td style="padding:10px 0; color:#7F7F7F;"><b data-customercomname>WP Valet LLC</b></td></tr>
 				    <tr style="font-size:28px; background-color:#CCCCFF;"><td><b>'. __('Address:','dxinvoice').'</b>
-				4659 56th Ter East</td></tr>
-				    <tr style="font-size:28px; background-color:#CCCCFF;"><td>'. __('ID No.','dxinvoice').'</td></tr>
-				    <tr style="font-size:28px; background-color:#CCCCFF;"><td>'. __('Contant Person','dxinvoice').'</td></tr>
+				<span class="changable-text" data-customercomaddr>4659 56th Ter East</span></td></tr>
+				    <tr style="font-size:28px; background-color:#CCCCFF;" class="changable-text" data-customercomidno><td>'. __('ID No.','dxinvoice').'</td></tr>
+				    <tr style="font-size:28px; background-color:#CCCCFF;" class="changable-text" data-customercomcontactp><td>'. __('Contant Person','dxinvoice').'</td></tr>
 				  </tbody>
 				</table>';
 ?>
@@ -65,18 +65,18 @@ $customer_detail = '<table style="padding:5px;">
 		<td width="12%"><?php echo  __('Total ( USD )','dxinvoice'); ?></td>
 	</tr>
 	<tr>
-		<td colspan="7" height="420px">
-			<table border="1">
+		<td colspan="7" height="420px" valign="top">
+			<table border="1" width="100%">
 				<tbody>
 				<?php foreach ($dx_top_custom_value as $invoice_row){?>
-				  <tr style="font-size:28px; text-align:center; border:none;">
-				  	<td width="6%"><?php echo  $invoice_row['number'] ?> </td> 
-					<td width="29%"><?php echo  $invoice_row['invoice_description'] ?></td>
-					<td width="15%"><?php echo  $invoice_row['rate'] ?></td>
-					<td width="9%"><?php echo  $invoice_row['quantity'] ?></td>
-					<td width="15%"><?php echo  $invoice_row['rate'] ?></td>
-					<td width="14%"><?php //echo  $invoice_row[''] ?></td>
-					<td width="12%"><?php echo  $invoice_row['total'] ?></td>
+				  <tr style="font-size:28px; text-align:center; border:none;" class="invoice-body-wrap">
+				  	<td width="6%" class="changable-text" ><?php echo  $invoice_row['number'] ?> </td> 
+					<td width="29%" class="changable-text" ><?php echo  $invoice_row['invoice_description'] ?></td>
+					<td width="15%" class="changable-text" ><?php echo  $invoice_row['rate'] ?></td>
+					<td width="9%" class="changable-text" ><?php echo  $invoice_row['quantity'] ?></td>
+					<td width="15%" class="changable-text" ><?php echo  $invoice_row['rate'] ?></td>
+					<td width="14%" class="changable-text" ><?php //echo  $invoice_row[''] ?></td>
+					<td width="12%" class="changable-text" ><?php echo  $invoice_row['total'] ?></td>
 				  </tr>
 				<?php $invoice_total += $invoice_row['total'];} ?>
 				</tbody>
@@ -137,7 +137,7 @@ $customer_detail = '<table style="padding:5px;">
 		<td>&nbsp;</td>
 		<td><?php echo  __('First Investment Bank','dxinvoice'); ?></td>
 		<td colspan="2" align="left">BIC: - </td>
-		<td colspan="2"><?php echo  __('IBAN:'.$dx_bank_account,'dxinvoice'); ?></td>
+		<td colspan="2"><?php echo  __('IBAN:','dxinvoice')."<span class='changable-text' data-bankacc>".$dx_bank_account; ?></span></td>
 		<td></td>
 	</tr>
 	</tbody>

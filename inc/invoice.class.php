@@ -81,35 +81,40 @@ class DX_Invoice_Class {
 	 * Register Invoice custom post type
 	 */
 	public static function register_invoice_cpt() {
+		
 		register_post_type( 'dx_invoice', array(
-			'labels' => array(
-				'name' => __('Invoices', 'dxinvoice'),
-				'singular_name' => __('Invoice', 'dxinvoice'),
-				'add_new' => _x('Add New', 'pluginbase', 'dxinvoice' ),
-				'add_new_item' => __('Add New Invoice', 'dxinvoice' ),
-				'edit_item' => __('Edit Invoice', 'dxinvoice' ),
-				'new_item' => __('New Invoice', 'dxinvoice' ),
-				'view_item' => __('View Invoice', 'dxinvoice' ),
-				'search_items' => __('Search Invoices', 'dxinvoice' ),
-				'not_found' =>  __('No Invoices found', 'dxinvoice' ),
-				'not_found_in_trash' => __('No Invoices found in Trash', 'dxinvoice' ),
+				'labels' 			=> array(
+				'name' 				=> __('Invoices', 'dxinvoice'),
+				'singular_name' 	=> __('Invoice', 'dxinvoice'),
+				'add_new' 			=> _x('Add New', 'pluginbase', 'dxinvoice' ),
+				'add_new_item' 		=> __('Add New Invoice', 'dxinvoice' ),
+				'edit_item' 		=> __('Edit Invoice', 'dxinvoice' ),
+				'new_item' 			=> __('New Invoice', 'dxinvoice' ),
+				'view_item' 		=> __('View Invoice', 'dxinvoice' ),
+				'search_items' 		=> __('Search Invoices', 'dxinvoice' ),
+				'not_found' 		=>  __('No Invoices found', 'dxinvoice' ),
+				'not_found_in_trash'=> __('No Invoices found in Trash', 'dxinvoice' ),
 			),
-			'description' => __('Invoices for the demo', 'dxinvoice'),
-			'public' => false,
-			'publicly_queryable' => false,
-			'query_var' => true,
-			'rewrite' => true,
-			'exclude_from_search' => true,
-			'show_ui' => true,
-			'show_in_menu' => true,
-			'menu_position' => 46,
-			'supports' => array(
-				'title',
-				'thumbnail',
-				'custom-fields',
-				'page-attributes',
-			),
-		));
+				'description' 		=> __('Invoices for the demo', 'dxinvoice'),
+				'public' 			=> true,
+				'publicly_queryable'=> true,
+				'query_var'			=> true,
+				'capability_type' 	=> 'post',
+				'rewrite' 			=> true,
+				'exclude_from_search' => true,
+				'rewrite' 			=> array( 'slug' => 'dxinvoice'),
+				'show_ui' 			=> true,
+				'show_in_admin_bar'     => true,
+				'show_in_menu' 		=> true,
+				'menu_position' 	=> 46,
+				'supports' 			=> array(
+										'title',
+										'thumbnail',
+										'custom-fields',
+										'page-attributes',
+									),
+			));
+			flush_rewrite_rules();
 	}
 	
 	/**
@@ -207,8 +212,8 @@ function dx_updated_messages( $messages ) {
 			} else {
 				if($key =='_invoice_number'){
 					$invoice_title =  get_option( 'dx_invoice_options' );
-					$increment = isset($invoice_title['increment'])?$invoice_title['increment']:0;
-					$meta_array[$key] = isset($invoice_title['invoice_num'])? $invoice_title['invoice_num'] + $increment :"";
+					$increment = !empty($invoice_title['increment'])?$invoice_title['increment']:1;
+					$meta_array[$key] = !empty($invoice_title['invoice_num'])? $invoice_title['invoice_num'] + $increment :1;
 					// Check existing		
 						$my_query = new WP_Query( 
 						    array(
@@ -267,7 +272,7 @@ function dx_updated_messages( $messages ) {
 		if( !isset( $_POST['invoice_nonce'] ) || !wp_verify_nonce( $_POST['invoice_nonce'], 'invoice_nonce_save' ) ) return;
 		
 		// if our current user can't edit this post, bail
-		if( !current_user_can( 'edit_post' ) ) return;
+		if( !current_user_can( 'edit_post'  , $post_id)) return;
 
 		$rows = !empty( $_POST['dx_invoice_rows_number'] ) ? (int) $_POST['dx_invoice_rows_number'] : 0;
 		$publish 	= isset($_POST['publish'])	?	$_POST['publish']	:"";
@@ -354,8 +359,8 @@ function dx_updated_messages( $messages ) {
 	public function dx_invoice_add_menu_page() { 
 		
 		$dx_invoice_settings = add_menu_page( __( 'Invoice Settings', 'dxinvoice' ), __( 'Invoice Settings', 'dxinvoice' ), 'manage_options','dx_invoice_settings', array($this, 'dx_invoice_settings') );
-		$dx_invoice_settings = add_menu_page( __( 'Google Contact', 'dxinvoice' ), __( 'Google Contact', 'dxinvoice' ), 'manage_options','dx_invoice_google_settings', array($this, 'dx_invoice_google_settings') );
-		add_submenu_page( 'dx_invoice_google_settings',  __( 'Outlook Contact', 'dxinvoice' ), __( 'Outlook Contact', 'dxinvoice' ), 'manage_options', 'dx_invoice_outlook_settings', array($this, 'dx_invoice_outlook_contact') );
+		add_submenu_page( 'dx_invoice_settings', __( 'Google Contact', 'dxinvoice' ), __( 'Google Contact', 'dxinvoice' ), 'manage_options','dx_invoice_google_settings', array($this, 'dx_invoice_google_settings') );
+		add_submenu_page( 'dx_invoice_settings',  __( 'Outlook Contact', 'dxinvoice' ), __( 'Outlook Contact', 'dxinvoice' ), 'manage_options', 'dx_invoice_outlook_settings', array($this, 'dx_invoice_outlook_contact') );
 
 		//add_action( "admin_head-$dx_invoice_settings", array( $this, 'dx_invoice_settings_scripts' ) );
 	}
@@ -594,43 +599,46 @@ function dx_updated_messages( $messages ) {
 	 * @since 1.0.0
 	 **/
 	
-	public function dx_inv_outlook_data($newcolumn) {
+	public function dx_inv_outlook_data() {
 		  
 			$outlook_request = isset($_GET['code'])?$_GET['code']:"";
-			
-			$dx_invoice_options 	= get_option( 'dx_invoice_options' );
-			$dx_outlook_client_id 	= isset($dx_invoice_options['dx_outlook_client_id'])?$dx_invoice_options['dx_outlook_client_id']:"";
-			$dx_outlook_client_secret= isset($dx_invoice_options['dx_outlook_client_secret'])?$dx_invoice_options['dx_outlook_client_secret']:"";
-			$dx_outlook_callback_url	= isset($dx_invoice_options['dx_outlook_callback_url'])?$dx_invoice_options['dx_outlook_callback_url']:"";
-			
+			if(isset($_GET['code']) && !isset($_GET['page'])){
 			if(!empty($outlook_request)){
-			$auth_code = $_GET["code"];
-			$fields=array(
-				'code'=>  urlencode($auth_code),
-				'client_id'=>  urlencode($client_id),
-				'client_secret'=>  urlencode($client_secret),
-				'redirect_uri'=>  urlencode($redirect_uri),
-				'grant_type'=>  urlencode('authorization_code')
-			);
-			$post = '';
-			foreach($fields as $key=>$value) { $post .= $key.'='.$value.'&'; }
-			$post = rtrim($post,'&');
-			$curl = curl_init();
-			curl_setopt($curl,CURLOPT_URL,'https://login.live.com/oauth20_token.srf');
-			curl_setopt($curl,CURLOPT_POST,5);
-			curl_setopt($curl,CURLOPT_POSTFIELDS,$post);
-			curl_setopt($curl, CURLOPT_RETURNTRANSFER,TRUE);
-			curl_setopt($curl, CURLOPT_SSL_VERIFYPEER,0);
-			$result = curl_exec($curl);
-			curl_close($curl);
-			$response =  json_decode($result);
-			$accesstoken = isset($response->access_token)?$response->access_token:"";
-			$url = 'https://apis.live.net/v5.0/me/contacts?access_token='.$accesstoken.'&limit=100';
-			$xmlresponse =  $this->curl_file_get_contents($url);
-			$xmldata = json_decode($xmlresponse, true);
-			$_SESSION['outlook'] = $xmldata;
-			wp_redirect(admin_url('admin.php?page=dx_customer_settings'));
-			exit;
+				$dx_invoice_options 	= get_option( 'dx_invoice_options' );
+				$dx_outlook_client_id 	= isset($dx_invoice_options['dx_outlook_client_id'])?$dx_invoice_options['dx_outlook_client_id']:"";
+				$dx_outlook_client_secret= isset($dx_invoice_options['dx_outlook_client_secret'])?$dx_invoice_options['dx_outlook_client_secret']:"";
+				$dx_outlook_callback_url	= isset($dx_invoice_options['dx_outlook_callback_url'])?$dx_invoice_options['dx_outlook_callback_url']:"";
+				
+				
+				$auth_code = $_GET["code"];
+				$fields=array(
+					'code'=>  urlencode($auth_code),
+					'client_id'=>  urlencode($dx_outlook_client_id),
+					'client_secret'=>  urlencode($dx_outlook_client_secret),
+					'redirect_uri'=>  urlencode($dx_outlook_callback_url),
+					'grant_type'=>  urlencode('authorization_code')
+				);
+				$post = '';
+				foreach($fields as $key=>$value) { $post .= $key.'='.$value.'&'; }
+				$post = rtrim($post,'&');
+				$curl = curl_init();
+				curl_setopt($curl,CURLOPT_URL,'https://login.live.com/oauth20_token.srf');
+				curl_setopt($curl,CURLOPT_POST,5);
+				curl_setopt($curl,CURLOPT_POSTFIELDS,$post);
+				curl_setopt($curl, CURLOPT_RETURNTRANSFER,TRUE);
+				curl_setopt($curl, CURLOPT_SSL_VERIFYPEER,0);
+				$result = curl_exec($curl);
+				curl_close($curl);
+				$response =  json_decode($result);
+				$accesstoken = isset($response->access_token)?$response->access_token:"";
+				$url = 'https://apis.live.net/v5.0/me/contacts?access_token='.$accesstoken.'&limit=100';
+				$xmlresponse =  $this->curl_file_get_contents($url);
+				$xmldata = json_decode($xmlresponse, true);
+				$_SESSION['outlook'] = $xmldata;
+				
+				wp_redirect(admin_url('admin.php?page=dx_invoice_outlook_settings'));
+				exit;
+			}
 		}
 	}
 	
@@ -657,7 +665,7 @@ function dx_updated_messages( $messages ) {
 	/**
 	 * Get auth url for windows live
 	 *
-	 * @param Social Deals Engine
+	 * @param DX Invoice
 	 * @since 1.0.0
 	 */	
 	public function dx_get_windowslive_auth_url () {
@@ -672,7 +680,174 @@ function dx_updated_messages( $messages ) {
 											'redirect_uri'	=>	$dx_outlook_callback_url
 										),
 									'https://login.live.com/oauth20_authorize.srf' );
-		return $dx_authurl;
+		return $dx_authurl;  
 		
 	}
+	
+	/**
+	 * Renders custom single template for CPT
+	 * @param   mixed  $template  The template chosen by WordPress
+	 * @return  mixed             The overriden template if the conditions are satisfied or default one chosen by WordPress
+	 */
+	public function dx_invoice_render_single( $template ) {
+		
+		if( ! is_single() || DX_INV_POST_TYPE != get_post_type() )
+			return $template;
+		
+			$single = DX_INV_DIR . '/template/' . DX_INV_POST_TYPE . '-single.php';
+			
+		if( ! file_exists( $single ) )
+			return $template;
+
+		return $single;
+	}
+	
+	/**
+	 * Customer Import outlook
+	 * 
+	 * Handles to filter the data by customer
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 **/
+	
+	public function add_outlook_customer() {
+		$customer_name = isset($_POST['customer_name'])?$_POST['customer_name']:"";
+		$dx_post = array(
+		  'post_title'    => $customer_name,
+		  'post_type'	  => DX_CUSTOMER_POST_TYPE	
+		);
+		  wp_insert_post( $dx_post );
+		  echo 1;
+		  exit;
+	}
+	
+	/**
+	 * Google Contacts curl
+	 * 
+	 * Handles to filter the data by customer
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 **/
+	
+	public function dx_google_curl() {
+		
+        $curl = curl_init();
+        $userAgent = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; .NET CLR 1.1.4322)';
+        curl_setopt($curl,CURLOPT_URL,$url);    //The URL to fetch. This can also be set when initializing a session with curl_init().
+        curl_setopt($curl,CURLOPT_RETURNTRANSFER,TRUE); //TRUE to return the transfer as a string of the return value of curl_exec() instead of outputting it out directly.
+        curl_setopt($curl,CURLOPT_CONNECTTIMEOUT,5);    //The number of seconds to wait while trying to connect.
+        if($post!="")
+        {
+            curl_setopt($curl,CURLOPT_POST,5);
+            curl_setopt($curl,CURLOPT_POSTFIELDS,$post);
+        }
+        curl_setopt($curl, CURLOPT_USERAGENT, $userAgent);  //The contents of the "User-Agent: " header to be used in a HTTP request.
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, TRUE);   //To follow any "Location: " header that the server sends as part of the HTTP header.
+        curl_setopt($curl, CURLOPT_AUTOREFERER, TRUE);  //To automatically set the Referer: field in requests where it follows a Location: redirect.
+        curl_setopt($curl, CURLOPT_TIMEOUT, 10);    //The maximum number of seconds to allow cURL functions to execute.
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);  //To stop cURL from verifying the peer's certificate.
+
+        $contents = curl_exec($curl);
+        curl_close($curl);
+        return $contents;
+	}
+	/**
+	 * Update frontend pdf
+	 * @param   mixed  $template  The template chosen by WordPress
+	 * @return  mixed             The overriden template if the conditions are satisfied or default one chosen by WordPress
+	 */
+	public function dx_invoice_update() {
+		
+		$arrayload = str_replace("\\", "", $_POST["invoicedata"]);
+		$invoice_body  =  json_decode($arrayload[0]);
+		$count = 0;
+		$number = array();
+		$invoice_description = array();
+		$rate = array();
+		$quantity = array();
+		$net = array();
+		$discount = array();
+		$total = array();
+		
+		foreach($invoice_body as $invoice_row){
+			
+			foreach ($invoice_row as $invoice_column)
+			{
+				switch ($count){
+					case 0:  
+								array_push($number,$invoice_column->index);
+					break;
+					case 1:   
+								array_push($invoice_description,$invoice_column->index);
+					break;
+					case 2:   
+								array_push($rate,$invoice_column->index);
+					break;
+					case 3:   
+								array_push($quantity,$invoice_column->index);
+					break;
+					case 4:   
+								array_push($net,$invoice_column->index);
+					break;
+					case 5:   
+								array_push($discount,$invoice_column->index);
+					break;
+					case 6:   
+								array_push($total,$invoice_column->index);
+					break;
+				}
+				$count++;
+			}
+			$count = 0;
+		}
+		$updateval = array();
+		for($i = 0; $i < count($number) ; $i++){
+			$updateval[$i]['number'] 				= $number[$i];
+			$updateval[$i]['invoice_description'] 	= $invoice_description[$i];
+			$updateval[$i]['rate'] 					= $rate[$i];
+			$updateval[$i]['quantity'] 				= $quantity[$i];
+			$updateval[$i]['net'] 					= $net[$i];
+			$updateval[$i]['total'] 				= $total[$i];
+		}
+		
+		$action = isset($_POST['action'])?$_POST['action']:"";
+		if($action == 'dx_invoice_update'){
+			$post_id 				=	isset($_POST['dx_page_id'])			?$_POST['dx_page_id']		:"";
+	    	$dx_clientname 			= 	isset($_POST['dx_clientname'])		?$_POST['dx_clientname']	:"" ;
+		    $data_clientcompany		=	isset($_POST['data_clientcompany'])	?$_POST['data_clientcompany']:"" ;
+		    $data_clientcomaddr		=	isset($_POST['data_clientcomaddr'])	?$_POST['data_clientcomaddr']:"" ;
+		    $data_clientcomnum 		=	isset($_POST['data_clientcomnum'])	?$_POST['data_clientcomnum']:"" ;
+		    $data_contactperson 	=	isset($_POST['data_contactperson'])	?$_POST['data_contactperson']:"";
+		    $data_customername		=	isset($_POST['data_customername']) 	?$_POST['data_customername']:"";
+		    $data_customercomname	=	isset($_POST['data_customercomname'])?$_POST['data_customercomname'] :"";
+		    $data_customercomaddr	=	isset($_POST['data_customercomaddr']) ?$_POST['data_customercomaddr']:"";
+		    $data_customercomidno	=	isset($_POST['data_customercomidno'] )?$_POST['data_customercomidno']:"" ;
+		    $data_customercomcontactp=	isset($_POST['data_customercomcontactp'])?$_POST['data_customercomcontactp']:"";
+		    $buttonevent			=	isset($_POST['buttonevent'])		? $_POST['buttonevent']:"";
+		    $customerid				=	isset($_POST['customerid'])			? $_POST['customerid']:"";
+		    $data_bankacc			=	isset($_POST['data_bankacc'])		?$_POST['data_bankacc']:"" ;
+		    $customer_post			= array(
+								      'ID'           => $customerid,
+								      'post_title' => $dx_clientname
+			  );
+			update_post_meta( $post_id, 'dx_invoice_items', $updateval );   
+		    wp_update_post( $customer_post );
+		    update_post_meta( $customerid, '_bank_account', $data_bankacc );
+		    update_post_meta( $customerid, '_company_name', $data_clientcompany );
+		    update_post_meta( $customerid, '_company_address', $data_clientcomaddr );
+		    update_post_meta( $customerid, '_company_number', $data_clientcomnum );
+		    update_post_meta( $customerid, '_client_name', $data_contactperson );
+		    
+		    if(isset($_POST['buttonevent']) && $_POST['buttonevent'] == 'saveandGenerate'){
+		    	$preview1 = add_query_arg( array( 'post_type' => DX_INV_POST_TYPE, 'dx_action_validate' => 'download-pdf', 'post_ID' => $post_id ), admin_url( 'edit.php' ) ); 
+		    	echo $preview1;
+		    }
+		    exit;
+		}
+	}
+	
+	
+	
 }
