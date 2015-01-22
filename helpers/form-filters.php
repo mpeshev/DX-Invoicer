@@ -13,7 +13,7 @@ class DX_Form_Filters {
 				'rate'		  => _x('Rate', 'invoice description type', 'dxinvoice'),
 				'quantity' 	  => _x('Quantity', 'invoice description type', 'dxinvoice'),
 				'net' 		  => _x('Net', 'invoice description type', 'dxinvoice'),
-			  //'vat_percent' => _x('VAT Percentage', 'invoice description type', 'dxinvoice'),
+			  	'discount' 	  => _x('Discount', 'invoice description type', 'dxinvoice'),
 				'total' 	  => _x('Total', 'invoice description type', 'dxinvoice'),
 		);
 		// Apply filters to update the columns
@@ -72,7 +72,10 @@ class DX_Form_Filters {
 									if( isset( $row[$key] ) ) {
 										$value = $row[$key];
 									}
+									if($key != 'net' && $key != 'total')
 									echo '<td><input type="text" name="' . $key . '[]" value="' . esc_attr( $value ) . '" class="' . esc_attr( DX_Invoicer::get_default_table_header_classes( $key ) ) . '" /></td>';								
+									else 
+									echo '<td><input type="text" name="' . $key . '[]" value="' . esc_attr( $value ) . '" class="' . esc_attr( DX_Invoicer::get_default_table_header_classes( $key ) ) . '" readonly /></td>';								
 								}
 								echo '<td><a href="#" class="dx_invoice_delete_row">Delete</a></td>';
 								echo "</tr>";
@@ -81,7 +84,7 @@ class DX_Form_Filters {
 						?>
 					</tbody>
 					<tfoot>
-						<tr>
+					<tr>
 					<?php 
 						foreach( $this->cols as $key => $col ) {
 							$value = ''; 
@@ -92,6 +95,26 @@ class DX_Form_Filters {
 							}
 							else if( $key == 'total' ) {
 								$span_class = 'dx_invoice_total_all';
+							}
+							
+							echo '<td class="' . esc_attr( DX_Invoicer::get_default_table_header_classes( $key ) ) . '"><span class="' . $span_class . '"></span></td>';								
+						}
+					?>
+					</tr>
+						<tr>
+							<td colspan="4"></td>
+							<td>Vat (&#37;)</td>
+							<td><input type="text" name="tax_value" class="dx_invoice_vat_field" value=""></td>
+							<td><input type="text" name="tax_amount" class="dx_invoice_vat_amount" readonly></td>
+						</tr>
+						<tr>
+					<?php 
+						foreach( $this->cols as $key => $col ) {
+							$value = ''; 
+							$span_class = '';
+							
+							if( $key == 'total' ) {
+								$span_class = 'dx_invoice_total_all_final';
 							}
 							
 							echo '<td class="' . esc_attr( DX_Invoicer::get_default_table_header_classes( $key ) ) . '"><span class="' . $span_class . '"></span></td>';								

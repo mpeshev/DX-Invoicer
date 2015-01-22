@@ -51,6 +51,13 @@ if ( !defined( 'ABSPATH' ) ) exit;
 			$invoice_signature 			= isset($dx_invoice_options['signature'])?$dx_invoice_options['signature']:"";
 			$invoice_page_template 		= isset($dx_invoice_options['page_template'])?$dx_invoice_options['page_template']:"";
 			
+			/*	Company Detail		*/
+			$dx_company_person 			= isset($dx_invoice_options['dx_company_person'])?$dx_invoice_options['dx_company_person']:"";
+			$dx_company_name 			= isset($dx_invoice_options['dx_company_name'])?$dx_invoice_options['dx_company_name']:"";
+			$dx_company_address 		= isset($dx_invoice_options['dx_company_address'])?$dx_invoice_options['dx_company_address']:"";
+			$dx_company_unique_number	= isset($dx_invoice_options['dx_company_unique_number'])?$dx_invoice_options['dx_company_unique_number']:"";
+			$dx_company_responsible_person	= isset($dx_invoice_options['dx_company_responsible_person'])?$dx_invoice_options['dx_company_responsible_person']:"";
+			$dx_company_bank_ac_number	= isset($dx_invoice_options['dx_company_bank_ac_number'])?$dx_invoice_options['dx_company_bank_ac_number']:"";
 			/*	Customer Google Contact get		*/
 			$dx_google_client_id		= isset($dx_invoice_options['dx_google_client_id'])?$dx_invoice_options['dx_google_client_id']:"";
 			$dx_google_client_secret	= isset($dx_invoice_options['dx_google_client_secret'])?$dx_invoice_options['dx_google_client_secret']:"";
@@ -152,6 +159,94 @@ if ( !defined( 'ABSPATH' ) ) exit;
 											<tr>
 												<td colspan="2">
 													<input type="submit" class="button-primary dx-invoice-settings-save" name="dx_invoice_settings_save" class="" value="<?php echo __( 'Save Changes', 'dxinvoice' ) ?>" />
+												</td>
+											</tr>
+										</tbody>
+									</table>
+						
+							</div><!-- .inside -->
+				
+						</div><!-- #settings -->
+			
+					</div><!-- .meta-box-sortables ui-sortable -->
+			
+				</div><!-- .metabox-holder -->
+			
+			</div><!-- #wps-settings-general -->
+			
+		<!-- end of the settings meta box -->		
+			
+		<!-- beginning of the settings meta box -->	
+			<div id="dx-company-settings" class="post-box-container">
+			
+				<div class="metabox-holder">	
+			
+					<div class="meta-box-sortables ui-sortable">
+			
+						<div id="settings" class="postbox">	
+			
+							<div class="handlediv" title="<?php echo __( 'Click to toggle', 'dxinvoice' ) ?>"><br /></div>
+			
+								<!-- settings box title -->					
+								<h3 class="hndle">					
+									<span style="vertical-align: top;"><?php echo __( 'Company Settings', 'dxinvoice' ) ?></span>					
+								</h3>
+			
+								<div class="inside">			
+
+									<table class="form-table dx-customer-settings-box"> 
+										<tbody>
+											<tr>
+												<th scope="row">
+													<label for="dx-person-name"><strong><?php echo __( 'Person Name', 'dxinvoice' ) ?></strong></label>
+												</th>
+												<td><input type="text" id="dx-person-name"  name="dx_invoice_options[dx_company_person]" value="<?php echo $dx_company_person; ?>" size="63" /><br />
+													<span class="description"><?php echo __( 'Enter Person Name', 'dxinvoice' ) ?></span>
+												</td>
+											 </tr>
+											<tr>
+												<th scope="row">
+													<label for="dx-company-name"><strong><?php echo __( 'Company Name', 'dxinvoice' ) ?></strong></label>
+												</th>
+												<td><input type="text" id="dx-company-name"  name="dx_invoice_options[dx_company_name]" value="<?php echo $dx_company_name; ?>" size="63" /><br />
+													<span class="description"><?php echo __( 'Enter Company Name', 'dxinvoice' ) ?></span>
+												</td>
+											 </tr>
+											 <tr>
+												<th scope="row">
+													<label for="dx-company-address"><strong><?php echo __( 'Company Address', 'dxinvoice' ) ?></strong></label>
+												</th>
+												<td><textarea rows="5" cols="60" name="dx_invoice_options[dx_company_address]"><?php echo $dx_company_address; ?></textarea><br>
+													<span class="description"><?php echo __( 'Enter Company Address', 'dxinvoice' ) ?></span>
+												</td>
+											 </tr>
+											 <tr>
+												<th scope="row">
+													<label for="dx-company-unique-number"><strong><?php echo __( 'Company Unique Number', 'dxinvoice' ) ?></strong></label>
+												</th>
+												<td><input type="text" id="dx-company-unique-number" name="dx_invoice_options[dx_company_unique_number]" value="<?php echo $dx_company_unique_number; ?>" size="63" /><br />
+													<span class="description"><?php echo __( 'Enter Company Unique Number', 'dxinvoice' ) ?></span>
+												</td>
+											 </tr>
+											 <tr>
+												<th scope="row">
+													<label for="dx-company-responsible-person"><strong><?php echo __( 'Responsible Person', 'dxinvoice' ) ?></strong></label>
+												</th>
+												<td><input type="text" id="dx-company-responsible-person" name="dx_invoice_options[dx_company_responsible_person]" value="<?php echo $dx_company_responsible_person; ?>" size="63" /><br />
+													<span class="description"><?php echo __( 'Enter Company Unique Number', 'dxinvoice' ) ?></span>
+												</td>
+											 </tr>
+											 <tr>
+												<th scope="row">
+													<label for="dx-company-bank-ac-number"><strong><?php echo __( 'Bank Account Number', 'dxinvoice' ) ?></strong></label>
+												</th>
+												<td><input type="text" id="dx-company-bank-ac-number" name="dx_invoice_options[dx_company_bank_ac_number]" value="<?php echo $dx_company_bank_ac_number; ?>" size="63" /><br />
+													<span class="description"><?php echo __( 'Enter Company Bank Account Number', 'dxinvoice' ) ?></span>
+												</td>
+											 </tr>
+											<tr>
+												<td colspan="2">
+													<input type="submit" class="button-primary dx-company-settings-save" name="dx_company_settings_save" class="" value="<?php echo __( 'Save Changes', 'dxinvoice' ) ?>" />
 												</td>
 											</tr>
 										</tbody>

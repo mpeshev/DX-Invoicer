@@ -1,7 +1,8 @@
 
 <?php
+
 global $post;
-  
+
 	$post_id = $post->ID;
 	$post_status = get_post_status( $post_id ) ;
 	 if("auto-draft" == $post_status){
@@ -22,8 +23,8 @@ global $post;
 	$dx_invoice_stamp_img	    = get_post_meta($post_id,'_invoice_stamp_img',true);
 	$dx_invoice_signature_img   = get_post_meta($post_id,'_invoice_signature_img',true);
 	$dx_templates   			= get_post_meta($post_id,'_page_templates',true);
-	$dx_top_custom_value   			= get_post_meta($post_id,'dx_invoice_items',true);
-	$dx_custom 					= get_post_custom( $post_id ); 
+	$dx_top_custom_value   		= get_post_meta($post_id,'dx_invoice_items',true);
+	$dx_vat_text		  		= get_post_meta($post_id,'_vat_text',true);
 	
 	if( is_serialized( $dx_top_custom_value ) ) {
 		$dx_top_custom_value = maybe_unserialize( $dx_top_custom_value );
@@ -32,8 +33,24 @@ global $post;
 	// Invoice Detail
 	$current_user 				= 	wp_get_current_user();
 	$current_user_firstname		=	$current_user->display_name;
+	$invoice_net				= 	"";
 	$invoice_total				= 	"";
-	foreach ($dx_top_custom_value as $invoice_row){$invoice_total += $invoice_row['total'];}
+	$invoice_discount			= 	"";
+	if(count($dx_top_custom_value)){
+		foreach ($dx_top_custom_value as $invoice_row)
+		{	
+			$invoice_net 		+= $invoice_row['net'];
+			$invoice_total 		+= $invoice_row['total'];
+			$invoice_discount 	+= $invoice_row['discount'];
+		}
+	}
+	
+	//Calculate VAT
+	$vat_amount = $dx_vat_text/100 * $invoice_total;
+	
+	//Calculate VAT
+	$dx_final_total = $invoice_total + $vat_amount;
+	
 	// Check invoice Option
 	$dx_invoice_options = get_option( 'dx_invoice_options' );
 	if(empty($dx_invoice_stamp_img)){
@@ -56,6 +73,14 @@ global $post;
 	$dx_client_name   			= 	get_post_meta($dx_client,'_client_name',true);
 	$dx_bank_account   			= 	get_post_meta($dx_client,'_bank_account',true);
 	
+	// Company Detail 
+	$dx_setting_person_name 				= 	$dx_invoice_options['dx_company_person'];
+	$dx_setting_company_name 				= 	$dx_invoice_options['dx_company_name'];
+	$dx_setting_company_address 			= 	$dx_invoice_options['dx_company_address'];
+	$dx_setting_company_unique_number 		= 	$dx_invoice_options['dx_company_unique_number'];
+	$dx_setting_company_responsible_person 	= 	$dx_invoice_options['dx_company_responsible_person'];
+	$dx_setting_company_bank_ac_number	 	= 	$dx_invoice_options['dx_company_bank_ac_number'];
+	
 ?>
 <html>
 <head>
@@ -63,184 +88,12 @@ global $post;
 <meta name="GENERATOR" content="Zend Studio" />
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>title</title>
-<style>
-body{margin:0; padding:0; font-size:20px !important;}
-.container{width:70%; margin:0 auto; margin-bottom:20px;}
-.editable.disable {
-    background: none repeat scroll 0 0 pink;
-    border-radius: 16px;
-    display: inline-block;
-    float: right;
-    padding: 5px;
-}
-.disable .changable-text,.disable .changable-textarea{border:1px dotted red;}
-.changable-text,.changable-textarea{cursor:pointer;}
-.wrapbutton {
-    margin: 0 auto;
-    text-align: center;
-    width: 84%;
-}
-#pdf-download{display:none;}
-</style>
-
-<script type='text/javascript' src='<?php echo includes_url(); ?>/js/jquery/jquery.js'></script>
+<link href="<?php echo DX_INV_URL; ?>/css/single-template.css" rel="stylesheet">
+<script type='text/javascript' src='<?php echo includes_url(); ?>js/jquery/jquery.js'></script>
+<script type='text/javascript' src='<?php echo DX_INV_URL; ?>js/single-template.js'></script>
 <script type='text/javascript'>
-var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
+	var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
 </script> 
-<script type="text/javascript">
-	jQuery(document).ready(function($){
-		$('.editable').click(function(){
-			$('body').toggleClass('disable');
-		});
-	
-		$textarea = $('.changable-textarea');
-		$text = $('.changable-text');
-		$body = $('body');
-		
-		
-		$text.click(function(event){
-			
-			if($text.find('input').length == 0){
-				$(this).html("<input type='text' value='"+$(this).html()+"' name='' >");
-				$(this).find('input').focus();
-			}
-			event.stopPropagation();
-		});
-		$textarea.click(function(event){
-			if($textarea.find('textarea').length == 0){
-				$(this).html("<textarea type='text'>"+$(this).html()+"</textarea>");
-				$(this).find('input').focus();
-			}
-			event.stopPropagation();
-		});
-		
-		$('body').click(function(event){
-			$inputavailable = $(this).find('input').length;
-			$textareaavailable = $(this).find('textarea').length;
-			
-			if($inputavailable){
-				$(this).find('input').each(function(e){
-					$fieldval = $.trim($(this).val());
-					$(this).replaceWith($fieldval);
-				});
-			}
-			if($textareaavailable){
-				$(this).find('textarea').each(function(e){
-					$fieldval = $.trim($(this).val());
-					$(this).replaceWith($fieldval);
-				});
-			}
-		});
-		
-		
-		$("body").keyup(function (e) {
-		    if (e.keyCode == 13) { 
-			    $inputavailable = $(this).find('input').length;
-				$textareaavailable = $(this).find('textarea').length;
-				
-				if($inputavailable){
-					$(this).find('input').each(function(e){
-						$fieldval = $.trim($(this).val());
-						$(this).replaceWith($fieldval);
-					});
-				}
-				if($textareaavailable){
-					$(this).find('textarea').each(function(e){
-						$fieldval = $.trim($(this).val());
-						$(this).replaceWith($fieldval);
-					});
-				}
-		    }
-		});
-		
-		$('button').click(function(){ 
-			
-				$inputavailable = $('body').find('input').length;
-				$textareaavailable = $('body').find('textarea').length;
-				
-				if($inputavailable){
-					$('body').find('input').each(function(e){
-						$fieldval = $(this).val();
-						$(this).replaceWith($fieldval);
-					});
-				}
-				if($textareaavailable){
-					$('body').find('textarea').each(function(e){
-						$fieldval = $(this).val();
-						$(this).replaceWith($fieldval);
-					});
-				}
-			
-			var btnevnt = $(this).attr('id');
-			/*	Table 1		*/
-			var clientname  			= $('[data-clientname]').html();
-			var clientid  				= $('[data-clientname]').data('clientname');
-			var data_clientcompany  	= $('[data-clientcompany]').html();
-			var data_clientcomaddr  	= $.trim($('[data-clientcomaddr]').html());
-			
-			var data_clientcomnum  		= $('[data-clientcomnum]').html();
-			var data_contactperson  		= $('[data-contactperson]').html();
-			/*	Table 2		*/
-			var data_customername  		= $('[data-customername]').html();
-			var data_customercomname  	= $('[data-customercomname]').html();
-			var data_customercomaddr  	= $('[data-customercomaddr]').html();
-			var data_customercomidno  	= $('[data-customercomidno]').html();
-			var data_customercomcontactp= $('[data-customercomcontactp]').html();
-			var data_bankacc			= $('[data-bankacc]').html();
-			
-			var tabledata = new Array();
-			var finaldata = new Array();
-			var parentIndex = "";
-			var childval = "";
-			$('.invoice-body-wrap').each(function(index){
-				parentIndex = index;
-				tabledata[index]= {};
-				
-				$(this).find('td').each(function(index){
-					childval = $(this).html();
-					tabledata[parentIndex][index] = {};
-					tabledata[parentIndex][index]= {index:childval};
-				});
-				finaldata.push(tabledata[index]);
-			});
-			
-			var datareturn = { 
-								action					:	'dx_invoice_update',
-								dx_page_id				:	<?php echo $post->ID; ?>,
-								dx_clientname			:	clientname,
-								data_clientcompany		:	data_clientcompany,
-								data_clientcomaddr		:	data_clientcomaddr,
-								data_clientcomnum		:	data_clientcomnum,
-								data_contactperson		:	data_contactperson,
-								data_customername		:	data_customername,
-								data_customercomname	:	data_customercomname,
-								data_customercomaddr	:	data_customercomaddr,
-								data_customercomidno	:	data_customercomidno,
-								data_customercomcontactp:	data_customercomcontactp,
-								data_bankacc			:	data_bankacc,
-								buttonevent				:	btnevnt,
-								customerid				:	clientid,
-								'invoicedata[]'			: 	JSON.stringify(finaldata)
-			
-			};
-						
-			console.log(datareturn);
-			jQuery.post(ajaxurl,datareturn,function(response) { 
-				
-				if(btnevnt == 'saveandGenerate'){
-					
-					$('#pdf-download').attr('href',response);
-					$('#pdf-download').show();
-					alert('PDF Saved Click below link for download');
-				}
-				else{
-					alert('PDF Saved');
-				}
-			});
-		});
-		
-	});
-</script>
 </head>
 <body bgcolor="#FFFFFF" text="#000000" link="#FF9966" vlink="#FF9966" alink="#FFCC99">
 

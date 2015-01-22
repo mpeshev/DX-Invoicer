@@ -9,7 +9,7 @@ Compitible Browser : IE-8, Google Crome, Mozillafirefox-15.0.1
 $dx_invoice_detail = '<table width="100%" border="0" style="padding:5px; ">
           <tbody><tr><td style="font-size:54px; font-weight:bold;" class="invoice-label" colspan="2">'. __('Invoice','dxinvoice').'</td></tr>
           <tr style="font-size:28px;">
-            <td style="text-align:right;">'. __('Date of financial event:','dxinvoice').'</td><td style="text-align:right; margin-right:20px;">25.12.2014  </td>
+            <td style="text-align:right;">'. __('Date of financial event:','dxinvoice').'</td><td style="text-align:right; margin-right:20px;">'.date("d.m.Y").'</td>
           </tr>
           <tr style="font-size:28px;">
             <td style="text-align:right;">'. __('Issued at:','dxinvoice').'</td><td style="text-align:right; margin-right:20px;">-</td>
@@ -21,7 +21,7 @@ $dx_invoice_detail = '<table width="100%" border="0" style="padding:5px; ">
 
 $client_detail = '<table style="padding:5px;">
 				    <tbody><tr class="client-title"><td class="changable-text" data-clientname="'.$dx_client.'">'. $dx_customer_name.'</td></tr>
-				    <tr style="font-size:38px; color:#7F7F7F;"><td><b class="changable-text" data-clientcompany >'.$dx_company_name.'</b></td></tr>
+				    <tr style="font-size:38px; color:#7F7F7F;"><td style="padding:10px 0;"><b class="changable-text" data-clientcompany >'.$dx_company_name.'</b></td></tr>
 				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF"><b>'. __('Address:','dxinvoice').'</b><span class="changable-textarea" data-clientcomaddr> 
 				'.$dx_company_address.'</span></td></tr>
 				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF">'. __('ID No.:','dxinvoice').'<span class="changable-text" data-clientcomnum>'. $dx_company_number.'</span></td></tr>
@@ -31,18 +31,19 @@ $client_detail = '<table style="padding:5px;">
 
 $customer_detail = '<table style="padding:5px;">
 				    <tbody><tr style="padding:10px 0;" class="client-title">
-				    <td class="changable-text" data-customername>'. __('Supplier','dxinvoice').'</td></tr>
-				    <tr style="font-size:38px;"><td style="padding:10px 0; color:#7F7F7F;"><b data-customercomname>WP Valet LLC</b></td></tr>
+				    <td class="changable-text" data-customername>'.$dx_setting_person_name.'</td></tr>
+				    <tr style="font-size:38px;"><td style="padding:10px 0; color:#7F7F7F;"><b data-customercomname class="changable-text">'.$dx_setting_company_name.'</b></td></tr>
 				    <tr style="font-size:28px; background-color:#CCCCFF;"><td><b>'. __('Address:','dxinvoice').'</b>
-				<span class="changable-text" data-customercomaddr>4659 56th Ter East</span></td></tr>
-				    <tr style="font-size:28px; background-color:#CCCCFF;" class="changable-text" data-customercomidno><td>'. __('ID No.','dxinvoice').'</td></tr>
-				    <tr style="font-size:28px; background-color:#CCCCFF;" class="changable-text" data-customercomcontactp><td>'. __('Contant Person','dxinvoice').'</td></tr>
+				<span class="changable-textarea" data-customercomaddr>'.$dx_setting_company_address.'</span></td></tr>
+				    <tr style="font-size:28px; background-color:#CCCCFF;" ><td>'. __('ID No.','dxinvoice').'<span class="changable-text" data-customercomidno>'.$dx_setting_company_unique_number.'</span></td></tr>
+				    <tr style="font-size:28px; background-color:#CCCCFF;" ><td>'. __('Contant Person : ','dxinvoice').'<span class="changable-text" data-customercomcontactp>'.$dx_setting_company_responsible_person.'</span></td></tr>
+				    <tr style="font-size:28px; background-color:#CCCCFF;" ><td>'. __('Contant Person : ','dxinvoice').'<span class="changable-text" data-setting-account>'.$dx_setting_company_bank_ac_number.'</span></td></tr>
 				  </tbody>
 				</table>';
 ?>
 
 
-<table border="1" width="100%">
+<table border="1" width="100%" class="table table-hover" data-post-id="<?php echo $post->ID; ?>">
   <tbody>
   <tr>
     <td style="border-width:0; border-right:none;" colspan="3" ></td>
@@ -50,7 +51,7 @@ $customer_detail = '<table style="padding:5px;">
       	<?php echo $dx_invoice_detail; ?>    </td>
   </tr>
 	<tr>
-		<td colspan="3" height="150px">
+		<td colspan="3" height="150px" valign="top">
 			<?php echo $client_detail; ?>		</td>
 		<td colspan="4" height="150px">
 			<?php echo $customer_detail; ?>		</td>
@@ -60,25 +61,28 @@ $customer_detail = '<table style="padding:5px;">
 		<td width="29%"><?php echo  __('Description','dxinvoice'); ?></td>
 		<td width="15%"><?php echo  __('Rate','dxinvoice'); ?></td>
 		<td width="9%"><?php echo  __('Qty','dxinvoice'); ?></td>
-		<td width="15%"><?php echo  __('Price Per Unit','dxinvoice'); ?></td>
+		<td width="15%"><?php echo  __('Net','dxinvoice'); ?></td>
 		<td width="14%"><?php echo  __('Discount','dxinvoice'); ?></td>
 		<td width="12%"><?php echo  __('Total ( USD )','dxinvoice'); ?></td>
 	</tr>
 	<tr>
 		<td colspan="7" height="420px" valign="top">
-			<table border="1" width="100%">
-				<tbody>
-				<?php foreach ($dx_top_custom_value as $invoice_row){?>
+			<table border="1" width="100%" class="table table-hover">
+				<tbody class="table-calc">
+				<?php foreach ($dx_top_custom_value as $invoice_row){
+					 if(count($invoice_row)){
+					?>
 				  <tr style="font-size:28px; text-align:center; border:none;" class="invoice-body-wrap">
-				  	<td width="6%" class="changable-text" ><?php echo  $invoice_row['number'] ?> </td> 
-					<td width="29%" class="changable-text" ><?php echo  $invoice_row['invoice_description'] ?></td>
-					<td width="15%" class="changable-text" ><?php echo  $invoice_row['rate'] ?></td>
-					<td width="9%" class="changable-text" ><?php echo  $invoice_row['quantity'] ?></td>
-					<td width="15%" class="changable-text" ><?php echo  $invoice_row['rate'] ?></td>
-					<td width="14%" class="changable-text" ><?php //echo  $invoice_row[''] ?></td>
-					<td width="12%" class="changable-text" ><?php echo  $invoice_row['total'] ?></td>
+				  	<td width="6%"><?php echo  $invoice_row['number']; ?> </td> 
+					<td width="29%" class="changable-text dx-invoice-desc" ><?php echo  $invoice_row['invoice_description']; ?></td>
+					<td width="15%" class="changable-text dx-rate" ><?php echo  $invoice_row['rate']; ?></td>
+					<td width="9%" class="changable-text dx-quantity" ><?php echo  $invoice_row['quantity']; ?></td>
+					<td width="15%" class="dx-net"><?php echo  $invoice_row['net']; ?></td>
+					<td width="14%" class="changable-text dx-discount" ><?php echo  $invoice_row['discount'] ?></td>
+					<td width="12%" class="dx-total"><?php echo  $invoice_row['total']; ?></td>
 				  </tr>
-				<?php $invoice_total += $invoice_row['total'];} ?>
+				<?php }
+				} ?>
 				</tbody>
 			</table>
 		</td>
@@ -87,27 +91,28 @@ $customer_detail = '<table style="padding:5px;">
 		<td colspan="4"></td>
 		<td bgcolor="#CCCCFF" valign="bottom"><?php echo  __('Net Amount','dxinvoice'); ?></td>
 		<td></td>
-		<td><?php echo $invoice_total; ?></td>
+		<td align="right" class="dx-net-amount"><?php echo number_format((float)$invoice_net, 2, '.', ''); ?></td>
 	</tr>
 	<tr style="font-size:30px; text-align:left;">
 		<td colspan="4"></td>
-		<td bgcolor="#CCCCFF"><?php echo  __('Tax Base','dxinvoice'); ?></td>
+		<td bgcolor="#CCCCFF"><?php echo  __('Discount','dxinvoice'); ?></td>
 		<td></td>
-		<td>-</td>
+		<td align="right" class="dx-discount-all"><?php echo number_format((float)$invoice_discount, 2, '.', ''); ?></td>
 	</tr>
 	<tr style="font-size:30px; text-align:left;">
-		<td colspan="2" bgcolor="#CCCCFF"><?php echo $dx_amount; ?></td>
+		<td colspan="2" bgcolor="#CCCCFF" class="dx-amount-all"><?php echo number_format((float)$dx_amount, 2, '.', ''); ?></td>
 		<td colspan="2"></td>
 		<td bgcolor="#CCCCFF"><?php echo  __('VAT','dxinvoice'); ?></td>
-		<td>0%</td>
-		<td>-</td>
+		<td align="right" class="dx-vat changable-text" ><?php echo $dx_vat_text."%"; ?></td>
+		<td align="right" class="dx-vat-amount"><?php echo number_format((float)$vat_amount, 2, '.', ''); ?></td>
+		
 	</tr>
 	<tr style="font-size:30px; text-align:left;">
 		<td colspan="2"><?php echo $dx_amount_text; ?></td>
 		<td colspan="2"></td>
 		<td bgcolor="#CCCCFF"><?php echo  __('Total','dxinvoice'); ?></td>
 		<td>0%</td>
-		<td><?php echo $invoice_total; ?></td>
+		<td align="right" class="dx-final-total"><?php echo number_format((float)$dx_final_total, 2, '.', ''); ?></td>
 	</tr>
 	<tr style="font-size:30px; text-align:left;">
 		<td colspan="4"></td>

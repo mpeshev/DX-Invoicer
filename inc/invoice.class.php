@@ -32,6 +32,11 @@ class DX_Invoice_Class {
 						'type' => 'text',
 						'desc' => 'Enter Amount In Word'
 				),
+				'_vat_text' => array(
+						'label' => __('VAT (in &#37;)', 'dxinvoice'),
+						'type' => 'text',
+						'desc' => 'Enter VAT In &#37;'
+				),
 				'_currency' => array(
 						'label' => __('Currency', 'dxinvoice'),
 						'type' => 'select',
@@ -99,8 +104,8 @@ class DX_Invoice_Class {
 				'public' 			=> true,
 				'publicly_queryable'=> true,
 				'query_var'			=> true,
-				'capability_type' 	=> 'post',
-				'rewrite' 			=> true,
+				'map_meta_cap'      => true,
+				'capability_type' 	=> DX_INV_POST_TYPE,
 				'exclude_from_search' => true,
 				'rewrite' 			=> array( 'slug' => 'dxinvoice'),
 				'show_ui' 			=> true,
@@ -546,17 +551,29 @@ function dx_updated_messages( $messages ) {
 	 * @since 1.0.0
 	 **/
 	public function dx_invoice_pre_get_post($query){
-		global $wpdb;
+		global $wpdb,$current_screen,$pagenow;
+		
+		$cid = get_current_user_id();
+		
+		$udata = get_userdata($cid);
+		$urole = implode(', ', $udata->roles);
+		$company_list = get_the_author_meta( 'company_list', $cid );
+		
 		if ( isset( $_GET['customer_id'] ) && !empty( $_GET['customer_id'] ) ) {
-	
 			$customer_id = $_GET['customer_id'];
-
 			if ( $query->is_main_query() ) {
-		        $query->set( 'meta_key', '_client' );       
-		        $query->set( 'meta_value', $customer_id );       
+		        //$query->set( 'meta_key', '_client' );       
+		        //$query->set( 'meta_value', $customer_id );       
 		    }
 		}
+		if(DX_CUSTOMER_ROLE == $urole ){
+			$query->set( 'meta_key', '_client' );       
+		    $query->set( 'meta_value', $company_list ); 
+		}
+		
 	}
+	
+		
 	/**
 	 * Invoice PDF preview option
 	 * 
@@ -809,6 +826,7 @@ function dx_updated_messages( $messages ) {
 			$updateval[$i]['rate'] 					= $rate[$i];
 			$updateval[$i]['quantity'] 				= $quantity[$i];
 			$updateval[$i]['net'] 					= $net[$i];
+			$updateval[$i]['discount'] 				= $discount[$i];
 			$updateval[$i]['total'] 				= $total[$i];
 		}
 		
@@ -825,20 +843,32 @@ function dx_updated_messages( $messages ) {
 		    $data_customercomaddr	=	isset($_POST['data_customercomaddr']) ?$_POST['data_customercomaddr']:"";
 		    $data_customercomidno	=	isset($_POST['data_customercomidno'] )?$_POST['data_customercomidno']:"" ;
 		    $data_customercomcontactp=	isset($_POST['data_customercomcontactp'])?$_POST['data_customercomcontactp']:"";
+		    $data_setting_account	=	isset($_POST['data_setting_account'])?$_POST['data_setting_account']:"";
 		    $buttonevent			=	isset($_POST['buttonevent'])		? $_POST['buttonevent']:"";
 		    $customerid				=	isset($_POST['customerid'])			? $_POST['customerid']:"";
 		    $data_bankacc			=	isset($_POST['data_bankacc'])		?$_POST['data_bankacc']:"" ;
+		    $vat_value				=	isset($_POST['vat_value'])		?$_POST['vat_value']:"" ;
 		    $customer_post			= array(
 								      'ID'           => $customerid,
 								      'post_title' => $dx_clientname
 			  );
 			update_post_meta( $post_id, 'dx_invoice_items', $updateval );   
+			update_post_meta( $post_id, '_vat_text', str_replace("%","", $vat_value) );   
 		    wp_update_post( $customer_post );
 		    update_post_meta( $customerid, '_bank_account', $data_bankacc );
 		    update_post_meta( $customerid, '_company_name', $data_clientcompany );
 		    update_post_meta( $customerid, '_company_address', $data_clientcomaddr );
 		    update_post_meta( $customerid, '_company_number', $data_clientcomnum );
 		    update_post_meta( $customerid, '_client_name', $data_contactperson );
+		   
+		    $dx_invoice_options['dx_company_person'] 			= $data_customername;
+		    $dx_invoice_options['dx_company_name'] 				= $data_customercomname;
+		    $dx_invoice_options['dx_company_address'] 			= $data_customercomaddr;
+	    	$dx_invoice_options['dx_company_unique_number'] 	= $data_customercomidno;
+		    $dx_invoice_options['dx_company_responsible_person']= $data_customercomcontactp;
+		    $dx_invoice_options['dx_company_bank_ac_number'] 	= $data_setting_account;
+
+		    update_option('dx_invoice_options',$dx_invoice_options);
 		    
 		    if(isset($_POST['buttonevent']) && $_POST['buttonevent'] == 'saveandGenerate'){
 		    	$preview1 = add_query_arg( array( 'post_type' => DX_INV_POST_TYPE, 'dx_action_validate' => 'download-pdf', 'post_ID' => $post_id ), admin_url( 'edit.php' ) ); 

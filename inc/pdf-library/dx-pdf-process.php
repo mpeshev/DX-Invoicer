@@ -15,40 +15,46 @@ if ( !defined( 'ABSPATH' ) ) exit;
 	 }
 	$postdata = get_post($post_id);
 	// Get Invoice Detail
-	$dx_invoice_number 			= get_post_meta($post_id,'_invoice_number');
-	$dx_client		   			= get_post_meta($post_id,'_client');
-	$dx_amount		   			= get_post_meta($post_id,'_amount');
-	$dx_amount_text	   			= get_post_meta($post_id,'_amount_text');
-	$dx_currency	   			= get_post_meta($post_id,'_currency');
-	$dx_description	   			= get_post_meta($post_id,'_description');
-	$dx_date_of_execution	    = get_post_meta($post_id,'_date_of_execution');
-	$dx_stamp_position   		= get_post_meta($post_id,'_stamp_position');
-	$dx_invoice_stamp_img	    = get_post_meta($post_id,'_invoice_stamp_img');
-	$dx_invoice_signature_img   = get_post_meta($post_id,'_invoice_signature_img');
-	$dx_custom 					= get_post_custom( $post_id ); 
-	//$customer_not_selected = add_query_arg( array( 'post' => $post_id, 'dx_action_validate' => 'generate-pdf', 'action' => 'edit', 'message' => 98), admin_url( 'edit.php' ) ); 
+	$dx_invoice_number 			= get_post_meta($post_id,'_invoice_number',true);
+	$dx_client		   			= get_post_meta($post_id,'_client',true);
+	$dx_amount		   			= get_post_meta($post_id,'_amount',true);
+	$dx_amount_text	   			= get_post_meta($post_id,'_amount_text',true);
+	$dx_currency	   			= get_post_meta($post_id,'_currency',true);
+	$dx_description	   			= get_post_meta($post_id,'_description',true);
+	$dx_date_of_execution	    = get_post_meta($post_id,'_date_of_execution',true);
+	$dx_stamp_position   		= get_post_meta($post_id,'_stamp_position',true);
+	$dx_invoice_stamp_img	    = get_post_meta($post_id,'_invoice_stamp_img',true);
+	$dx_invoice_signature_img   = get_post_meta($post_id,'_invoice_signature_img',true);
+	$dx_top_custom_value   		= get_post_meta($post_id,'dx_invoice_items',true);
+	$templates   				= get_post_meta($post_id,'_page_templates',true);
+	$dx_vat_text		  		= get_post_meta($post_id,'_vat_text',true);
 	
-	$dx_top_custom_value = $dx_custom['dx_invoice_items'][0];
-	$templates = isset($dx_custom['_page_templates'][0])?$dx_custom['_page_templates'][0]:"";
 	if( is_serialized( $dx_top_custom_value ) ) {
-		//$dx_top_custom_value = @unserialize( $dx_top_custom_value );
 		$dx_top_custom_value = maybe_unserialize( $dx_top_custom_value );
 	}
-	$dx_stamp_position			=  isset($dx_stamp_position[0])	? $dx_stamp_position[0] :"";
 	// Invoice Detail
-	$dx_amount  				=  isset($dx_amount[0])			?$dx_amount[0]		:"";
-	$dx_client  				=  isset($dx_client[0])			?$dx_client[0]		:"";
-	$dx_invoice_number  		=  isset($dx_invoice_number[0])	?$dx_invoice_number[0]:"";
-	$dx_amount_text  			=  isset($dx_amount_text[0])	?$dx_amount_text[0]:"";
-	$dx_currency  				=  isset($dx_currency[0])		?$dx_currency[0]:"";
-	$dx_description  			=  isset($dx_description[0])	?$dx_description[0]:"";
-	$dx_date_of_execution  		=  isset($dx_date_of_execution[0])?$dx_date_of_execution[0]:"";
-	$dx_invoice_stamp_img  		=  isset($dx_invoice_stamp_img[0])?$dx_invoice_stamp_img[0]:"";
-	$dx_invoice_signature_img  	=  isset($dx_invoice_signature_img[0])?$dx_invoice_signature_img[0]:"";
 	$current_user 				= 	wp_get_current_user();
 	$current_user_firstname		=	$current_user->display_name;
+	$invoice_net				= 	"";
 	$invoice_total				= 	"";
-	foreach ($dx_top_custom_value as $invoice_row){$invoice_total += $invoice_row['total'];}
+	$invoice_discount			=	"";
+	
+	if(count($dx_top_custom_value)){
+		foreach ($dx_top_custom_value as $invoice_row)
+		{	
+			$invoice_net 		+= $invoice_row['net'];
+			$invoice_total 		+= $invoice_row['total'];
+			$invoice_discount 	+= $invoice_row['discount'];
+		}
+	}
+	
+	//Calculate VAT
+	$vat_amount = $dx_vat_text/100 * $invoice_total;
+	
+	//Calculate VAT with total
+	$dx_final_total = $invoice_total + $vat_amount;
+	
+	
 	// Check invoice Option
 	$dx_invoice_options = get_option( 'dx_invoice_options' );
 	if(empty($dx_invoice_stamp_img)){
@@ -57,7 +63,15 @@ if ( !defined( 'ABSPATH' ) ) exit;
 	if(empty($dx_invoice_signature_img)){
 			$dx_invoice_signature_img = isset($dx_invoice_options['signature'])?$dx_invoice_options['signature']:"";
 	}
-	//include html template
+	
+	// Company Detail 
+	$dx_setting_person_name 				= 	$dx_invoice_options['dx_company_person'];
+	$dx_setting_company_name 				= 	$dx_invoice_options['dx_company_name'];
+	$dx_setting_company_address 			= 	$dx_invoice_options['dx_company_address'];
+	$dx_setting_company_unique_number 		= 	$dx_invoice_options['dx_company_unique_number'];
+	$dx_setting_company_responsible_person 	= 	$dx_invoice_options['dx_company_responsible_person'];
+	$dx_setting_company_bank_ac_number	 	= 	$dx_invoice_options['dx_company_bank_ac_number'];
+	
 	
 	// Customer Detail
 	$custdata					=	get_post($dx_client);
@@ -65,12 +79,12 @@ if ( !defined( 'ABSPATH' ) ) exit;
 	$dx_customer_name			=   !empty($custdata->post_title)? $custdata->post_title	:"";
 	
 	$clientmetadata 			= 	get_post_custom($dx_client);
-	$dx_company_name			=	isset($clientmetadata['_company_name'][0])		?$clientmetadata['_company_name'][0]:"";
-	$dx_company_address			=	isset($clientmetadata['_company_address'][0])	?$clientmetadata['_company_address'][0]:"";
-	$dx_company_number			=	isset($clientmetadata['_company_number'][0])	?$clientmetadata['_company_number'][0]:"";
-	$dx_client_name				=	isset($clientmetadata['_client_name'][0])		?$clientmetadata['_client_name'][0]:"";
-	$dx_bank_account			=	isset($clientmetadata['_bank_account'][0])		?$clientmetadata['_bank_account'][0]:"";
 	
+	$dx_company_name   			= 	get_post_meta($dx_client,'_company_name',true);
+	$dx_company_address   		= 	get_post_meta($dx_client,'_company_address',true);
+	$dx_company_number   		= 	get_post_meta($dx_client,'_company_number',true);
+	$dx_client_name   			= 	get_post_meta($dx_client,'_client_name',true);
+	$dx_bank_account   			= 	get_post_meta($dx_client,'_bank_account',true);
 	// Template Start
 	ob_start();
 	if(empty($templates)){
@@ -157,7 +171,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 	
 	// Transparancy Image Stamp
 	if(!empty($dx_invoice_stamp_img)){
-	$pdf->Image($dx_invoice_stamp_img, $dx_stamp_position, 130, 30, '', '', 'http://Dxinvoice.com', '', false, 300);}
+	$pdf->Image($dx_invoice_stamp_img, $dx_stamp_position, 130, 30, '', '', '', '', false, 300);}
 	//if(!empty($dx_invoice_signature_img))
 	//$pdf->Image($dx_invoice_signature_img, 174, 241, 20, 10, '', 'http://Dxinvoice.com', '', false, 300);
 	// output the HTML content

@@ -14,7 +14,7 @@
 
 // Defines
 // ....
-global $dx_customer_instance, $dx_invoice_instance,$wp_version;;
+global $dx_customer_instance, $dx_invoice_instance,$wp_version,$dx_form_helper;
 if( !defined( 'DX_INV_DIR' ) ) {
 	define( 'DX_INV_DIR', dirname( __FILE__ ) ); // plugin dir
 }
@@ -30,6 +30,13 @@ if( !defined( 'DX_CUSTOMER_POST_TYPE' ) ) {
 if( !defined( 'DX_PREFIX' ) ) {
 	define( 'DX_PREFIX', 'dx_' ); // plugin dir
 }
+if( !defined( 'DX_INVOICE_CUSTOMER_ROLE' ) ) {
+	define( 'DX_INVOICE_CUSTOMER_ROLE', 'dx_customer_role' ); // plugin dir
+}
+//Get Customer Role
+if( !defined( 'DX_CUSTOMER_ROLE' ) ) {
+	define( 'DX_CUSTOMER_ROLE', 'dx_customer_role' ); //plugin vendor role
+}
 
 if( !class_exists( 'DX_Invoicer' ) ) {
 	class DX_Invoicer {
@@ -41,21 +48,23 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 			$this->include_files();
 			$this->register_cpts();
 			$this->prepare_hooks();
+			
 		}
 		
 		/**
 		 * Include helper files for the plugin
 		 */
 		public function include_files() {
-			global $dx_customer_instance, $dx_invoice_instance;
+			global $dx_customer_instance, $dx_invoice_instance,$dx_form_helper;
  			require_once DX_INV_DIR.'/inc/invoice.class.php';
  			require_once DX_INV_DIR.'/inc/customer.class.php';
  			require_once DX_INV_DIR.'/helpers/form-helper.php';
  			require_once DX_INV_DIR.'/helpers/form-filters.php';
  			
  			
- 			$dx_invoice_instance = new DX_Invoice_Class();
- 			$dx_customer_instance = new DX_Customer_Class();
+ 			$dx_invoice_instance 	= new DX_Invoice_Class();
+ 			$dx_customer_instance 	= new DX_Customer_Class();
+ 			$dx_form_helper 		= new DX_Form_Helper();
 		}
 		
 		/**
@@ -93,21 +102,28 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 				wp_enqueue_script('postbox');
 				wp_enqueue_script( 'dx-invoicer-upload', plugins_url( '/js/dx-invoicer-img.js', __FILE__ ), array( 'jquery' ) );
 				
-				//Chooser CSS/JS
-					wp_enqueue_style( 'dx-chosen-css',plugins_url( '/js/chosen/chosen.css', __FILE__ ), array(), null );	
-					wp_enqueue_style( 'dx-chosen-custom-css', plugins_url( '/js/chosen/chosen-custom.css', __FILE__ ), array(), null );	
-					wp_enqueue_script( 'dx-chosen-js', plugins_url( '/js/chosen/chosen.jquery.js', __FILE__ ), array( 'jquery' ), false, true );
+			//Chooser CSS/JS
+			wp_enqueue_style( 'dx-chosen-css',plugins_url( '/js/chosen/chosen.css', __FILE__ ), array(), null );	
+			wp_enqueue_style( 'dx-chosen-custom-css', plugins_url( '/js/chosen/chosen-custom.css', __FILE__ ), array(), null );	
+			wp_enqueue_script( 'dx-chosen-js', plugins_url( '/js/chosen/chosen.jquery.js', __FILE__ ), array( 'jquery' ), false, true );
 				
 				$newui = $wp_version >= '3.5' ? '1' : '0'; //check wp version for showing media uploader
 				wp_localize_script( 'dx-invoicer-upload', 'DxImgSettings', array( 'new_media_ui'	=>	$newui	));
 				//for new media uploader
 				wp_enqueue_media();
 			}
+			/*	Setting Page CSS & JS	*/
 			$dx_setting_page = array('toplevel_page_dx_customer_settings','toplevel_page_dx_invoice_settings');
 			if(in_array($hook,$dx_setting_page)){
 				wp_enqueue_script('postbox');
 				wp_enqueue_style( 'dx-invoicer-admin', plugins_url( '/css/dx-invoicer-admin.css', __FILE__ ), array(), '1.0', 'screen' );
 				wp_enqueue_script( 'dx-invoicer-customer-setting', plugins_url( '/js/dx-invoicer-customer-setting.js', __FILE__ ), array( 'jquery' ) );
+				
+			}
+			/*	User CSS & JS		*/
+			$dx_user_page = array('user-edit.php','user-new.php');
+			if(in_array($hook,$dx_user_page)){ 
+				wp_enqueue_script( 'dx-invoicer-user', plugins_url( '/js/dx-invoicer-user.js', __FILE__ ), array( 'jquery' ) );				
 			}
 		}
 
@@ -123,7 +139,7 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 		}
 		
 		public function register_cpts() { 
-			global $dx_customer_instance, $dx_invoice_instance;
+			global $dx_customer_instance, $dx_invoice_instance,$dx_form_helper;
 			$post_type = DX_INV_POST_TYPE;
 			add_action( 'init', array( $dx_invoice_instance, 'register_invoice_cpt' ), 10 );
 			add_action( 'init', array( $dx_customer_instance, 'register_customer_cpt' ), 10 );
@@ -135,6 +151,8 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 			add_action( 'save_post', array( $dx_customer_instance, 'save_customer_post' ) );
 			
 			add_action('admin_init',array($dx_invoice_instance,'dx_invoice_admin_init'));
+			add_action('admin_init',array($this,'dx_customer_role'));
+			add_action('admin_init',array($this,'dx_invoicer_add_capabilities'));
 			add_action('admin_init',array($dx_customer_instance,'dx_customer_admin_init'));
 			add_action('admin_menu',array($dx_invoice_instance, 'dx_invoice_add_menu_page'));
 			//add_action('admin_menu',array($dx_customer_instance, 'dx_customer_add_menu_page'));
@@ -161,7 +179,13 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 			//add action to call ajax
 			add_action( 'wp_ajax_dx_invoice_update', array( $dx_invoice_instance, 'dx_invoice_update' ));
 			add_action( 'wp_ajax_nopriv_dx_invoice_update',array( $dx_invoice_instance,  'dx_invoice_update' ));
-			 	add_filter( 'template_include', array( $dx_invoice_instance,'dx_invoice_render_single'), 99 );
+			add_filter( 'template_include', array( $dx_invoice_instance,'dx_invoice_render_single'), 99 );
+			add_action( 'show_user_profile', array( $dx_form_helper,'usermeta_table' ));
+			add_action( 'user_new_form', array( $dx_form_helper,'usermeta_adduser_table' ));
+			add_action('user_register', array( $dx_form_helper,'save_newuser_data'));
+			add_action( 'edit_user_profile', array( $dx_form_helper,'usermeta_table' ));
+			add_action( 'personal_options_update', array( $dx_form_helper,'save_extra_user_profile_fields') );
+			add_action( 'edit_user_profile_update', array( $dx_form_helper,'save_extra_user_profile_fields') );
 			
 		}
 		
@@ -173,12 +197,121 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 				case 'quantity': return 'dx_invoice_quantity_field';
 				case 'net': return 'dx_invoice_net_field';
 				case 'total': return 'dx_invoice_total_field';
+				case 'discount': return 'dx_invoice_discount_field';
 				
 				default: return apply_filters('dx_invoicer_default_column_class_name', '');
 			}
 		}
+		/**
+		 *  Add Role to customer 
+		 */
+		public function dx_customer_role() {
+			
+			// Customer role
+			//remove_role(DX_CUSTOMER_ROLE);
+			
+			//get customer role
+			$customer_role = get_role( DX_CUSTOMER_ROLE );
+			$capability_type =  DX_INV_POST_TYPE ;
+			$capabilities = array(
+	
+				// Post type
+				"read",
+				"edit_{$capability_type}",
+				"read_{$capability_type}",
+				"edit_{$capability_type}s",
+				"edit_others_{$capability_type}s",
+				"publish_{$capability_type}s",
+				"read_private_{$capability_type}s",
+				"edit_private_{$capability_type}s",
+				"edit_published_{$capability_type}s",
+				
+	
+			);
+			$capability = array();
+			foreach ($capabilities as $cap){
+				$capability[$cap] = true;
+			}
+			if( empty( $customer_role ) ) { //check Customer role
+				add_role( DX_CUSTOMER_ROLE,__( 'Customer Role', 'dxinvoice' ), $capability );
+			} else {
+				//$customer_role->add_cap( $capabilities );
+			}
+			
+		}
+		/**
+	 * Assign Capabilities To Roles
+	 *
+	 * Handles to assign needed capabilites to 
+	 * administrator roles
+	 * 
+	 * @package  DX Invoicer
+	 * @since 1.0.0
+	 */
+	function dx_invoicer_add_capabilities() {
 		
+		global $wp_roles;
+	
+		//check WP_Roles class is exist or not
+		if ( class_exists('WP_Roles') )
+			if ( ! isset( $wp_roles ) )
+				$wp_roles = new WP_Roles();
+	
+		// check $wp_roles is object or not
+		if ( is_object( $wp_roles ) ) {
+	
+			//get all assigning capabilities of dx_invoicer
+			$capabilities = $this->dx_invoicer_get_capabilities();
+	
+			foreach( $capabilities as $cap_group ) {
+				foreach( $cap_group as $cap ) {
+					//assign some capability to administrator for deals engine
+					$wp_roles->add_cap( 'administrator', $cap );
+				}//for each for adding cap
+			} //for each for capablities
+			
+		} //end if to check $wp_roles
+	}
+	/**
+ 	* Get All Capabilities
+ 	* 
+ 	* Handles to return all required capabilites 
+ 	* for DX invoicer
+ 	*
+ 	* @package  DX Invoicer
+ 	* @since 1.0.0
+ 	*/
+	function dx_invoicer_get_capabilities() {
 		
+		$capabilities = array();
+	
+		$capability_types = array( DX_INV_POST_TYPE, DX_CUSTOMER_POST_TYPE );
+	
+		foreach( $capability_types as $capability_type ) {
+	
+			$capabilities[ $capability_type ] = array(
+	
+				// Post type
+				"edit_{$capability_type}",
+				"read_{$capability_type}",
+				"delete_{$capability_type}",
+				"edit_{$capability_type}s",
+				"edit_others_{$capability_type}s",
+				"publish_{$capability_type}s",
+				"read_private_{$capability_type}s",
+				"delete_{$capability_type}s",
+				"delete_private_{$capability_type}s",
+				"delete_published_{$capability_type}s",
+				"delete_others_{$capability_type}s",
+				"edit_private_{$capability_type}s",
+				"edit_published_{$capability_type}s",
+	
+			);
+		}
+		return $capabilities;
+	}
+	
+	
 		
 	}
 	

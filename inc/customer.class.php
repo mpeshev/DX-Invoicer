@@ -48,6 +48,8 @@ class DX_Customer_Class {
 			'publicly_queryable' => false,
 			'query_var' => true,
 			'rewrite' => true,
+			'map_meta_cap'      => true,
+			'capability_type' 	=> DX_CUSTOMER_POST_TYPE,
 			'exclude_from_search' => true,
 			'show_ui' => true,
 			'show_in_menu' => true,

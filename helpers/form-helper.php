@@ -38,7 +38,7 @@ class DX_Form_Helper {
 					<th scope="row">
 						<label for="<?php echo $id_prefix . $id ?>"><?php echo $text ?></label>	
 					</th>
-					<td><textarea id="<?php echo $id_prefix . $id ?>" name="<?php echo $name ?>" rows="2" cols="20"><?php echo $value ?></textarea><br />
+					<td><textarea id="<?php echo $id_prefix . $id ?>" name="<?php echo $name ?>" rows="5" cols="20"><?php echo $value ?></textarea><br />
 						<span class="description"><?php echo $desc; ?></span>
 					</td>
 				</tr>
@@ -188,5 +188,80 @@ class DX_Form_Helper {
 
 			// Filter attributes if any new form of attribute is discovered
 			return apply_filters( 'dx_invoice_attributes_setup', $attributes );
+	}
+	/* User meta field	*/
+	public function usermeta_table($user){ 
+		
+		?>
+		<h3><?php _e("Extra profile information", "blank"); ?></h3>
+
+		<table class="form-table">
+			<tr>
+				<th><label for="address"><?php _e("Select Company"); ?></label></th>
+				<td>
+				<?php 
+					$company_list = get_the_author_meta( 'company_list', $user->ID );
+				 ?>
+				<select class="invoice_company" name="company_list">
+				
+					<?php 
+					$args = array(
+					'post_type' => DX_CUSTOMER_POST_TYPE,
+					);
+					$bulk_post = get_posts($args); 
+					foreach ($bulk_post as $post){
+						if(in_array($post->ID,$company_list))
+						echo '<option value="'.$post->ID.'" selected>'.get_post_meta($post->ID,"_company_name",true).'</option>';
+						else 
+						echo '<option value="'.$post->ID.'">'.get_post_meta($post->ID,"_company_name",true).'</option>';
+					}
+					?>
+				</select>
+				<span class="description"><?php _e("Please select company."); ?></span>
+				</td>
+			</tr>
+		</table>
+		<?php
+	}
+	/* Add form user meta field	*/
+	public function usermeta_adduser_table(){ 
+			
+			?>
+			<h3 class="dx-user-role"><?php _e("Extra profile information", "blank"); ?></h3>
+	
+			<table class="form-table dx-user-role">
+				<tr>
+					<th><label for="address"><?php _e("Select Company"); ?></label></th>
+					<td>
+					<select class="invoice_company" name="company_list">
+						<?php 
+						$args = array(
+						'post_type' => DX_CUSTOMER_POST_TYPE,
+						);
+						$bulk_post = get_posts($args); 
+						foreach ($bulk_post as $post){
+							
+							echo '<option value="'.$post->ID.'">'.get_post_meta($post->ID,"_company_name",true).'</option>';
+						}
+						?>
+					</select>
+					<span class="description"><?php _e("Please select company."); ?></span>
+					</td>
+				</tr>
+			</table>
+			<?php
+		}
+	/* User Meta details */
+	function save_extra_user_profile_fields( $user_id ) { 
+	
+		if ( !current_user_can( 'edit_user', $user_id ) ) { return false; }
+		update_user_meta( $user_id, 'company_list', $_POST['company_list'] );
+		
+	}
+	/* User Meta details */
+	function save_newuser_data( $user_id ) { 
+		if ( !current_user_can( 'edit_user', $user_id ) ) { return false; }
+		update_user_meta( $user_id, 'company_list', $_POST['company_list'] );
+		
 	}
 }
