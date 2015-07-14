@@ -525,6 +525,7 @@ function dx_updated_messages( $messages ) {
 	 **/
 	public function dx_invoice_restrict_manage_posts() {
 		
+		global $wpdb;
 		$post_type = isset($_REQUEST['post_type'])?$_REQUEST['post_type']:"";
 			
 		if ( $post_type == DX_INV_POST_TYPE ) {
@@ -536,15 +537,25 @@ function dx_updated_messages( $messages ) {
 					'order' => 'ASC',
 					'orderby' => 'title'
 			));
+			$querystr = "
+			    SELECT $wpdb->posts.* 
+			    FROM $wpdb->posts
+			    WHERE $wpdb->posts.post_status = 'publish' 
+			    AND $wpdb->posts.post_type = 'dx_customer'
+			    ORDER BY $wpdb->posts.post_date DESC
+			 ";
+
+			$r_customer = $wpdb->get_results($querystr, OBJECT);
 			ob_start();
 			?>		
 				<select name="customer_id" id="<?php echo the_ID(); ?>">
 					<option id="dx_empty_customer" value=""><?php _e('Select Customer', 'dxinvoice'); ?></option>
-					<?php while( $customers_query->have_posts() ):
-							$customers_query->the_post(); ?>
-					<option id="customer_<?php the_ID(); ?>" value="<?php the_ID(); ?>" <?php echo (get_the_ID() == $customer_id ? 'selected' : '' ) ?>><?php echo the_title(); ?></option>
-					<?php endwhile;
-						wp_reset_postdata();
+					<?php 
+					foreach ($r_customer as $key => $_customer) {
+						?>
+						<option id="customer_<?php echo $_customer->ID; ?>" value="<?php echo $_customer->ID; ?>" <?php echo ($_customer->ID == $customer_id ? 'selected' : '' ) ?>><?php echo $_customer->post_title; ?></option>
+						<?php
+					}
 					?>
 				</select>
 			<?php
@@ -556,17 +567,91 @@ function dx_updated_messages( $messages ) {
 	/**
 	 * @author Tonjoo
 	 * 
-	 * Query to unpaid invoices for each customer
+	 * Handles to filter the data by status payment
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 **/
+	public function dx_invoice_restrict_manage_posts_filter_by_status() {
+		
+		global $wpdb;
+		$post_type = isset($_REQUEST['post_type'])?$_REQUEST['post_type']:"";
+			
+		if ( $post_type == DX_INV_POST_TYPE ) {
+
+			$html = '';
+			$payment_status 	  = isset( $_GET['payment_status'] ) ? $_GET['payment_status'] : '';
+			$r_status = array(
+					'paid' => 'paid',
+					'unpaid' => 'unpaid'
+				);
+
+			ob_start();
+			?>		
+				<select name="payment_status" id="payment_status">
+					<option id="dx_empty_payment" value=""><?php _e('Select Payment Status', 'dxinvoice'); ?></option>
+					<?php 
+					foreach ($r_status as $key => $_status) {
+						?>
+						<option id="payment_status_<?php echo $_status; ?>" value="<?php echo $_status; ?>" <?php echo ($key == $payment_status ? 'selected' : '' ) ?>><?php echo $_status; ?></option>
+						<?php
+					}
+					?>
+				</select>
+			<?php
+			$html .= ob_get_clean();
+			echo  $html;
+	    }
+	}
+
+	/**
+	 * @author Tonjoo
+	 * 
+	 * Filter invoice by customer
 	 * @param type $query 
 	 * @return type
 	 */
 	public function get_dx_invoice_by_customer($query) {
 	    global $pagenow;
 
+	    if (is_admin() && $pagenow == 'edit.php' && isset($_GET['post_type']) && $_GET['post_type']=='dx_invoice' && !isset($_GET['invoice_status']) )  {
+
+	        if(current_user_can('manage_options')) {
+	        	if(isset($_GET['payment_status']) && $_GET['payment_status'] != '')
+	        	{
+	        		$query_sort[] =  array(
+		                    'key'       => '_dx_status_invoice',
+		                    'value'     => $_GET['payment_status'],
+		                    'compare'   => '='
+		                );	         
+	        	}
+	        	if(isset($_GET['customer_id']) && $_GET['customer_id'] != '')
+	        	{
+		            $query_sort[] = array(
+		                    'key'       => '_client',
+		                    'value'     => $_GET['customer_id'],
+		                    'compare'   => '='
+		            );
+	            }	       
+	            $query->set('meta_query', $query_sort);
+   	        	add_filter('posts_where', array(&$this,'my_custom_posts_where'));
+	        }
+    	
+	    }
+	}
+	/**
+	 * @author Tonjoo
+	 * 
+	 * Query to unpaid invoices for each customer
+	 * @param type $query 
+	 * @return type
+	 */
+	public function get_dx_invoice_by_customer_and_invoice_status($query) {
+	    global $pagenow;
+
 	    if (is_admin() && $pagenow == 'edit.php' && isset($_GET['post_type']) && $_GET['post_type']=='dx_invoice' && isset($_GET['customer_id'])  && isset($_GET['invoice_status']))  {
 
 	        if(current_user_can('manage_options')) {
-
 
 	            $query->set('meta_query', array(
 	                array(
@@ -575,14 +660,31 @@ function dx_updated_messages( $messages ) {
 	                    'compare'   => '='
 	                ),
 	                array(
-	                    'key'       => '_status_invoice',
+	                    'key'       => '_dx_status_invoice',
 	                    'value'     => $_GET['invoice_status'],
 	                    'compare'   => '='
 	                )
 	            ));
+
+	        	add_filter('posts_where', array(&$this,'my_custom_posts_where'));
 	        }
     	
 	    }
+	}
+
+	/**
+	 * add query 
+	 * @param type $where 
+	 * @return query
+	 */
+	public function my_custom_posts_where( $where = '' )
+	{
+
+	    global $wpdb;
+
+	    remove_filter('posts_where', 'my_custom_posts_where');
+	    
+	    return $where;
 	}
 
 	/**

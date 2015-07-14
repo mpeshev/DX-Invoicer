@@ -248,7 +248,16 @@ class DX_Form_Filters {
 		}
 	}
 	
-
+	/**
+	 * Add field for displaying invoice status 
+	 * 
+	 * @param $type field type (text, dx_invoicer_form_field, select, textarea...)
+	 * @param $item the item name
+	 * @param $attributes array with attributes
+	 * @param $method HTTP method where data is stored
+	 * @param $section_prefix a prefix for the section, if any
+	 * @param $id_prefix a prefix for IDs, if any
+	 */
 
 	public function add_status_invoices( $type, $item, $attributes, $method, $section_prefix, $id_prefix ) {
 		if( $type == 'status_invoice' ) {

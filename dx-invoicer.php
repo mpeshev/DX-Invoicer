@@ -168,6 +168,9 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 			add_action( 'manage_posts_custom_column' , array($dx_customer_instance,'dx_display_customer_invoice_total'), 10, 2 );
 			// Add category filter in Invoice list page
 			add_action( 'restrict_manage_posts', array( $dx_invoice_instance, 'dx_invoice_restrict_manage_posts' ) );
+			add_action( 'restrict_manage_posts', array( $dx_invoice_instance, 'dx_invoice_restrict_manage_posts_filter_by_status' ) );
+
+			add_filter( 'parse_query', array( $dx_invoice_instance, 'get_dx_invoice_by_customer_and_invoice_status' ) );
 			add_filter( 'parse_query', array( $dx_invoice_instance, 'get_dx_invoice_by_customer' ) );
 			// Add action for display deals using deal type
 			add_filter( 'pre_get_posts', array( $dx_invoice_instance, 'dx_invoice_pre_get_post' ));
