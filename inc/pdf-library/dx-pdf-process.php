@@ -23,6 +23,9 @@ if ( !defined( 'ABSPATH' ) ) exit;
 	$dx_description	   			= get_post_meta($post_id,'_description',true);
 	$dx_date_of_execution	    = get_post_meta($post_id,'_date_of_execution',true);
 	$dx_stamp_position   		= get_post_meta($post_id,'_stamp_position',true);
+
+	$dx_status_invoice   		= get_post_meta($post_id,'_dx_status_invoice',true);
+
 	$dx_invoice_stamp_img	    = get_post_meta($post_id,'_invoice_stamp_img',true);
 	$dx_invoice_signature_img   = get_post_meta($post_id,'_invoice_signature_img',true);
 	$dx_top_custom_value   		= get_post_meta($post_id,'dx_invoice_items',true);

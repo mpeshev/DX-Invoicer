@@ -176,7 +176,8 @@ class DX_Customer_Class {
 	function add_customer_invoice_column($columns) {
 		return array_merge( $columns, 
       	array('_total_invoice' => __('Total Invoice','dxinvoice'),
-          	 '_total_invoice_amount' => __('Total Invoice Amount','dxinvoice')));
+          	 '_total_invoice_amount' => __('Total Invoice Amount','dxinvoice'),
+          	 '_total_invoice_unpaid' => __('Total Invoice Unpaid','dxinvoice')));
 	}
 	/**
 	 * Get Total of Invoice
@@ -226,6 +227,30 @@ class DX_Customer_Class {
 		   		
 			   	echo array_sum($amount_invoice);
 		   		 break;
+		case '_total_invoice_unpaid' :
+		   		 
+		   		 $querystr = "
+			    SELECT $wpdb->posts.* 
+			    FROM $wpdb->posts, $wpdb->postmeta
+			    WHERE $wpdb->posts.ID = $wpdb->postmeta.post_id 
+			    AND $wpdb->postmeta.meta_key = '_client' 
+			    AND $wpdb->postmeta.meta_value = $post_id 
+			    AND $wpdb->posts.post_status = 'publish' 
+			    AND $wpdb->posts.post_type = 'dx_invoice'
+			    ORDER BY $wpdb->posts.post_date DESC
+			 ";
+		   		 $pageposts = $wpdb->get_results($querystr, OBJECT);
+		    	
+			    $total_unpid = 0;
+			    foreach ( $pageposts as $key => $project ){
+			    	if(get_post_meta($project->ID,'_dx_status_invoice',true) == 'unpaid' )
+			    	{
+			    		$total_unpid += 1;
+			    	}
+			    }
+		   		
+			   	echo "<a href='edit.php?orderby=customer&post_status=all&post_type=dx_invoice&customer_id={$post_id}&invoice_status=unpaid'>".$total_unpid.'</a>';
+		   		break;
 	    }
 	}
 	
@@ -264,6 +289,7 @@ class DX_Customer_Class {
 		  
 		$newcolumn['_total_invoice']  = 'customer';
 		$newcolumn['_total_invoice_amount']  = 'invoiceamount';
+		$newcolumn['_total_invoice_unpaid']  = 'invoiceunpaid';
 		return $newcolumn;
 	}
 }

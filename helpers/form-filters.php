@@ -24,6 +24,7 @@ class DX_Form_Filters {
 		add_action( 'dx_invoicer_form_fields_action', array( $this, 'add_customer_field' ), 10, 6 );
 		add_action( 'dx_invoicer_form_fields_action', array( $this, 'add_custom_templates' ), 10, 6 );
 		add_action( 'dx_invoicer_form_fields_action', array( $this, 'add_stamp_position' ), 10, 6 );
+		add_action( 'dx_invoicer_form_fields_action', array( $this, 'add_status_invoices' ), 10, 6 );
 	}
 	
 	/**
@@ -229,6 +230,7 @@ class DX_Form_Filters {
 				</th>
 				<td>
 				<div class="stamp-radio">
+
 					<input type="radio" id="radio1" name="<?php echo $name ?>" value="30" <?php echo ($value == 30)? "checked" :""; ?> >
 					<label for="radio1">Left</label>
 					<input type="radio" id="radio2" name="<?php echo $name ?>" value="90" <?php echo ($value == 90)? "checked" :""; ?> >
@@ -236,6 +238,52 @@ class DX_Form_Filters {
 					<input type="radio" id="radio3" name="<?php echo $name ?>" value="150" <?php echo ($value == 150)? "checked" :""; ?> >
 					<label for="radio3">Right</label>
 				</div>
+					<br />
+					<span class="description"><?php echo __( 'Select Stamp position.', 'dxinvoice' ) ?></span>
+				</td>
+			 </tr>
+			<?php 
+			$output = ob_get_clean();
+			echo apply_filters( 'dx_invoice_filter_invoices_table', $output );
+		}
+	}
+	
+
+
+	public function add_status_invoices( $type, $item, $attributes, $method, $section_prefix, $id_prefix ) {
+		if( $type == 'status_invoice' ) {
+			//extract( $attributes );
+			extract( array_merge ($attributes, DX_Form_Helper::get_element_attributes( $item, $attributes, $method ) ) );
+			$label = !empty($label)	? $label	:"";
+		    $type  = !empty($type)	? $type		:"";
+		    $name  = !empty($name)	? $name		:"";
+		    $value = !empty($value)	? $value	:"unpaid";
+		    $text  = !empty($text)	? $text		:"";
+		    $id    = !empty($id)	? $id		:"";
+		    $class = !empty($class)	? $class	:"";
+		    $style = !empty($style)	? $style	:"";
+			$initial_rows = 0;
+			$current_user_id = get_current_user_id();
+
+			$option = array(
+					'unpaid' => __('UNPAID','dxinvoice'),
+					'paid' => __('PAID','dxinvoice')
+				);
+			ob_start();
+
+			?>
+			<tr>
+				<th scope="row">
+					<label for="<?php echo $id_prefix . $id ?>"><?php echo $text ?></label>	
+				</th>
+				<td>
+					<select name="<?php echo $name ?>" id="<?php echo $id_prefix . $id ?>" >
+							<option id="dx_status_invoice" value=""><?php _e('Select Status Invoice', 'dxinvoice'); ?></option>						
+							<?php
+								foreach($option as $key => $_option){ ?>
+									<option value="<?php echo $key; ?>" <?php if($key == $value) {echo 'selected="selected"';}  ?>><?php echo $_option; ?></option>
+							<?php	} ?>
+					</select>
 					<br />
 					<span class="description"><?php echo __( 'Select Stamp position.', 'dxinvoice' ) ?></span>
 				</td>

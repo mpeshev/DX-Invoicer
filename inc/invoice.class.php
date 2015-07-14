@@ -71,6 +71,11 @@ class DX_Invoice_Class {
 						'label' => __('Invoice Signature', 'dxinvoice'),
 						'type' => 'image',
 						'desc' => 'Upload Signature'
+				),
+				'_dx_status_invoice' => array(
+						'label' => __('Status Invoice', 'dxinvoice'),
+						'type' => 'status_invoice',
+						'desc' => 'Select Status Invooce'
 				)
 		);
 		
@@ -481,8 +486,9 @@ function dx_updated_messages( $messages ) {
 		//return array_merge( $columns, 
       	//array('_customer_name' => 'Customer',
           	 //'_invoice_amount' => 'Invoice Amount'));
-          	 $columns['_customer_name'] = 'Customer';
-          	 $columns['_invoice_amount'] = 'Invoice Amount';
+          	 $columns['_customer_name'] = __('Customer','dxinvoice');
+          	 $columns['_invoice_amount'] = __('Invoice Amount','dxinvoice');
+          	 $columns['_dx_status_invoice'] = __('Invoice Status','dxinvoice');
           	 return $columns;
 	}
 	
@@ -495,14 +501,17 @@ function dx_updated_messages( $messages ) {
 
 	function dx_display_posts( $column, $post_id ) {
 	    switch ( $column ) {
-		case '_customer_name' :
+			case '_customer_name' :
 		   		 $customer_id 	= 	get_post_meta($post_id,'_client',true);
 			   	if(!empty($customer_id)){
 		   			echo get_the_title( $customer_id );
 			   	}
 		   		 break;
-		case '_invoice_amount' :
+			case '_invoice_amount' :
 			    echo get_post_meta( $post_id , '_amount' , true ); 
+		    	break;
+			case '_dx_status_invoice' :
+			    echo get_post_meta( $post_id , '_dx_status_invoice' , true ) == 'unpaid' ? '<p style="color:red;font-weight:bold;">'.get_post_meta( $post_id , '_dx_status_invoice' , true ).'</p>': '<p style="color:green;font-weight:bold;">'.get_post_meta( $post_id , '_dx_status_invoice' , true ).'</p>' ; 
 		    	break;
 	    }
 	}
@@ -517,8 +526,9 @@ function dx_updated_messages( $messages ) {
 	public function dx_invoice_restrict_manage_posts() {
 		
 		$post_type = isset($_REQUEST['post_type'])?$_REQUEST['post_type']:"";
-		
+			
 		if ( $post_type == DX_INV_POST_TYPE ) {
+
 			$html = '';
 			$customer_id 	  = isset( $_GET['customer_id'] ) ? $_GET['customer_id'] : '';
 			$customers_query = new WP_Query(array(
@@ -542,6 +552,39 @@ function dx_updated_messages( $messages ) {
 			echo  $html;
 	    }
 	}
+
+	/**
+	 * @author Tonjoo
+	 * 
+	 * Query to unpaid invoices for each customer
+	 * @param type $query 
+	 * @return type
+	 */
+	public function get_dx_invoice_by_customer($query) {
+	    global $pagenow;
+
+	    if (is_admin() && $pagenow == 'edit.php' && isset($_GET['post_type']) && $_GET['post_type']=='dx_invoice' && isset($_GET['customer_id'])  && isset($_GET['invoice_status']))  {
+
+	        if(current_user_can('manage_options')) {
+
+
+	            $query->set('meta_query', array(
+	                array(
+	                    'key'       => '_client',
+	                    'value'     => $_GET['customer_id'],
+	                    'compare'   => '='
+	                ),
+	                array(
+	                    'key'       => '_status_invoice',
+	                    'value'     => $_GET['invoice_status'],
+	                    'compare'   => '='
+	                )
+	            ));
+	        }
+    	
+	    }
+	}
+
 	/**
 	 * Handle Filter By Customer
 	 * 
@@ -606,6 +649,7 @@ function dx_updated_messages( $messages ) {
 		  
 		$newcolumn['_customer_name']  = 'customer';
 		$newcolumn['_invoice_amount']  = 'invoiceamount';
+		$newcolumn['_dx_status_invoice']  = 'invoicetotalunpaid';
 		return $newcolumn;
 	}
 	/**
@@ -829,9 +873,10 @@ function dx_updated_messages( $messages ) {
 			$updateval[$i]['discount'] 				= $discount[$i];
 			$updateval[$i]['total'] 				= $total[$i];
 		}
-		
+
 		$action = isset($_POST['action'])?$_POST['action']:"";
 		if($action == 'dx_invoice_update'){
+
 			$post_id 				=	isset($_POST['dx_page_id'])			?$_POST['dx_page_id']		:"";
 	    	$dx_clientname 			= 	isset($_POST['dx_clientname'])		?$_POST['dx_clientname']	:"" ;
 		    $data_clientcompany		=	isset($_POST['data_clientcompany'])	?$_POST['data_clientcompany']:"" ;
