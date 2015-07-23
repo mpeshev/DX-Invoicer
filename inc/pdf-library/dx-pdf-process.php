@@ -75,7 +75,6 @@ if ( !defined( 'ABSPATH' ) ) exit;
 	$dx_setting_company_responsible_person 	= 	$dx_invoice_options['dx_company_responsible_person'];
 	$dx_setting_company_bank_ac_number	 	= 	$dx_invoice_options['dx_company_bank_ac_number'];
 	
-	
 	// Customer Detail
 	$custdata					=	get_post($dx_client);
 	

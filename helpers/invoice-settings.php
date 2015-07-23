@@ -5,7 +5,6 @@
 
 // Exit if accessed directly
 if ( !defined( 'ABSPATH' ) ) exit;
-
 ?>
 <div class="wrap">
 	
@@ -158,7 +157,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 										 </tr>
 											<tr>
 												<td colspan="2">
-													<input type="submit" class="button-primary dx-invoice-settings-save" name="dx_invoice_settings_save" class="" value="<?php echo __( 'Save Changes', 'dxinvoice' ) ?>" />
+													<input type="submit" class="button-primary dx-invoice-settings-save" name="dx_invoice_settings_save" value="<?php echo __( 'Save Changes', 'dxinvoice' ) ?>" />
 												</td>
 											</tr>
 										</tbody>
@@ -240,7 +239,25 @@ if ( !defined( 'ABSPATH' ) ) exit;
 												<th scope="row">
 													<label for="dx-company-bank-ac-number"><strong><?php echo __( 'Bank Account Number', 'dxinvoice' ) ?></strong></label>
 												</th>
-												<td><input type="text" id="dx-company-bank-ac-number" name="dx_invoice_options[dx_company_bank_ac_number]" value="<?php echo $dx_company_bank_ac_number; ?>" size="63" /><br />
+												<td>
+													<input type="text" id="dx-company-bank-ac-number" name="dx_invoice_options[dx_company_bank_ac_number]" value="<?php echo $dx_company_bank_ac_number; ?>" size="63" />
+													<div class="btn btn-default btn-sm" id="add-more-bank-account"> add more</div>
+													
+													<div class="bank_account_append">
+														<?php
+														$dx_company_bank_ac_number_other = get_option('dx_company_bank_ac_number_other'); 
+														if($dx_company_bank_ac_number_other)
+														{
+															foreach ($dx_company_bank_ac_number_other as $key => $value) 
+															{
+															?>
+																<div><input type="text" class="new_bank_account_append" name="dx_company_bank_ac_number_other[]" value="<?php echo $value?>" size="63" /><div class="btn btn-danger btn-sm remove"> remove</div></div>
+															<?php														
+															}
+														}
+														?>
+													</div>
+													<br />
 													<span class="description"><?php echo __( 'Enter Company Bank Account Number', 'dxinvoice' ) ?></span>
 												</td>
 											 </tr>

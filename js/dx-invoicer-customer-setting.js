@@ -54,5 +54,15 @@ jQuery(document).ready(function($){
 	$("#invoice-page-template").chosen();
 	
 	postboxes.add_postbox_toggles( "dx-customer-settings" );			
+	
+	$('#add-more-bank-account').on('click',function(){
+
+		$('.bank_account_append').append( '<div><input type="text" class="new_bank_account_append" name="dx_company_bank_ac_number_other[]" value="" size="63" /><div class="btn btn-danger btn-sm remove"> remove</div></div>' );
 		
+	})
+	$('.bank_account_append').on('click', '.remove', function(e) {
+   		 e.preventDefault();
+
+	    $(this).parent().remove();
+	});
 });

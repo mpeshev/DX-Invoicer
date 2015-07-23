@@ -362,7 +362,7 @@ function dx_updated_messages( $messages ) {
 	
 	 /**
 	 * Add Invoice Setting
-	 /**
+	 * 
 	 * @package DX Invoice
 	 * @since 1.0.0
 	 */
@@ -461,18 +461,33 @@ function dx_updated_messages( $messages ) {
 		$action_validate = isset($_REQUEST['dx_action_validate'])?$_REQUEST['dx_action_validate']:"";
 		
 		if($action_validate == 'generate-pdf' ){
-			// I for preview
-			$pdf_view_type = 'I';
-			//include_once DX_INV_DIR.'/inc/pdf-library/pdf-template-generate.php';
-			include_once DX_INV_DIR.'/inc/pdf-library/dx-pdf-process.php';
-			//dx_invoice_to_pdf();
+			$dxinvoice_item_row_data = get_post_meta($post_id,'dx_invoice_items',true);
+			if(empty($dxinvoice_item_row_data))
+			{
+				echo"<div class='error'><p>Row Box item cannot be emptied to generate / preview invoice.</p></div>";
+				die();
+			}else{
+				// I for preview
+				$pdf_view_type = 'I';
+				//include_once DX_INV_DIR.'/inc/pdf-library/pdf-template-generate.php';
+				include_once DX_INV_DIR.'/inc/pdf-library/dx-pdf-process.php';
+				//dx_invoice_to_pdf();
+			}
+		
 		}
 		if($action_validate == 'download-pdf' ){
-			// D for download
-			$pdf_view_type = 'D';
-			//include_once DX_INV_DIR.'/inc/pdf-library/pdf-template-generate.php';
-			include_once DX_INV_DIR.'/inc/pdf-library/dx-pdf-process.php';
-			//dx_invoice_to_pdf();
+			$dxinvoice_item_row_data = get_post_meta($post_id,'dx_invoice_items',true);
+			if(empty($dxinvoice_item_row_data))
+			{
+				echo"<div class='error'><p>Row Box item cannot be emptied to generate / preview invoice.</p></div>";
+				die();
+			}else{
+				// D for download
+				$pdf_view_type = 'D';
+				//include_once DX_INV_DIR.'/inc/pdf-library/pdf-template-generate.php';
+				include_once DX_INV_DIR.'/inc/pdf-library/dx-pdf-process.php';
+				//dx_invoice_to_pdf();
+			}
 		}
 	}
 	
@@ -922,7 +937,7 @@ function dx_updated_messages( $messages ) {
 	 * @return  mixed             The overriden template if the conditions are satisfied or default one chosen by WordPress
 	 */
 	public function dx_invoice_update() {
-		
+				
 		$arrayload = str_replace("\\", "", $_POST["invoicedata"]);
 		$invoice_body  =  json_decode($arrayload[0]);
 		$count = 0;

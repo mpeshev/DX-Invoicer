@@ -25,6 +25,11 @@ class DX_Form_Filters {
 		add_action( 'dx_invoicer_form_fields_action', array( $this, 'add_custom_templates' ), 10, 6 );
 		add_action( 'dx_invoicer_form_fields_action', array( $this, 'add_stamp_position' ), 10, 6 );
 		add_action( 'dx_invoicer_form_fields_action', array( $this, 'add_status_invoices' ), 10, 6 );
+		add_action( 'do_meta_boxes', array( $this, 'dx_invoice_remove_image_box' ), 10, 6 );
+		add_action( 'do_meta_boxes', array( $this, 'dx_customer_remove_image_box' ), 10, 6 );
+		add_action( 'admin_init', array( $this, 'dx_customer_set_user_metaboxes' ), 10, 6 );
+		add_action( 'admin_init', array( $this, 'dx_invoice_set_user_metaboxes' ), 10, 6 );
+		add_action( 'admin_init', array( $this, 'save_options' ), 10, 6 );
 	}
 	
 	/**
@@ -74,7 +79,7 @@ class DX_Form_Filters {
 										$value = $row[$key];
 									}
 									if($key != 'net' && $key != 'total')
-									echo '<td><input type="text" name="' . $key . '[]" value="' . esc_attr( $value ) . '" class="' . esc_attr( DX_Invoicer::get_default_table_header_classes( $key ) ) . '" /></td>';								
+									echo '<td><input autocomplete="off" type="text" name="' . $key . '[]" value="' . esc_attr( $value ) . '" class="' . esc_attr( DX_Invoicer::get_default_table_header_classes( $key ) ) . '" /></td>';								
 									else 
 									echo '<td><input type="text" name="' . $key . '[]" value="' . esc_attr( $value ) . '" class="' . esc_attr( DX_Invoicer::get_default_table_header_classes( $key ) ) . '" readonly /></td>';								
 								}
@@ -382,6 +387,89 @@ class DX_Form_Filters {
 		}
 		
 		self::$instance = new DX_Form_Filters();
+	}
+
+	/**
+	 * Remove featured image from post type dx_invoice
+	 * @return type
+	 */
+	public function dx_invoice_remove_image_box() {
+	   remove_meta_box('postimagediv','dx_invoice','side');
+	}
+
+	/**
+	 * Remove featured image from post type dx_customer
+	 * @return type
+	 */
+	public function dx_customer_remove_image_box() {
+	   remove_meta_box('postimagediv','dx_customer','side');
+	}
+
+	/**
+	 * Auto hide customer field in page dx_invoice for all admin  
+	 * @param type $user_id 
+	 * @return type
+	 */
+	public function dx_invoice_set_user_metaboxes($user_id = NULL) {
+
+	    // So this can be used without hooking into user_register
+	    if ( ! $user_id)
+	        $user_id = get_current_user_id(); 
+
+	    if ( get_user_meta( $user_id, 'metaboxhidden_dx_invoice', true) ) {
+	        $meta_value = array('postcustom','trackbacksdiv','commentstatusdiv','commentsdiv','slugdiv','authordiv','revisionsdiv');
+	        update_user_meta( $user_id, 'metaboxhidden_dx_invoice', $meta_value );
+	    }else{
+	        $meta_value = array('postcustom','trackbacksdiv','commentstatusdiv','commentsdiv','slugdiv','authordiv','revisionsdiv');
+	    	add_user_meta( $user_id, 'metaboxhidden_dx_invoice', $meta_value );
+	    }
+	}
+	/**
+	 * Auto hide customer field in page dx_customer for all admin  
+	 * @param type $user_id 
+	 * @return type
+	 */
+	public function dx_customer_set_user_metaboxes($user_id = NULL) 
+	{
+	    // So this can be used without hooking into user_register
+	    if ( ! $user_id)
+	        $user_id = get_current_user_id(); 
+
+	    if ( get_user_meta( $user_id, 'metaboxhidden_dx_customer', true) ) {
+	        $meta_value = array('postcustom','trackbacksdiv','commentstatusdiv','commentsdiv','slugdiv','authordiv','revisionsdiv');
+	        update_user_meta( $user_id, 'metaboxhidden_dx_customer', $meta_value );
+	    }else{
+	        $meta_value = array('postcustom','trackbacksdiv','commentstatusdiv','commentsdiv','slugdiv','authordiv','revisionsdiv');
+	    	add_user_meta( $user_id, 'metaboxhidden_dx_customer', $meta_value );
+	    }
+	}
+
+	/**
+	 * save other bank account
+	 * @return type
+	 */
+	public function save_options()
+	{
+		if(isset($_POST['dx_invoice_options'])){
+			
+			$option_name = 'dx_company_bank_ac_number_other' ;
+			$new_value = $_POST['dx_company_bank_ac_number_other'] ;
+
+			if ( get_option( $option_name ) !== false ) {
+
+			    // The option already exists, so we just update it.
+			    update_option( $option_name, $new_value );
+
+			} else {
+
+			    // The option hasn't been added yet. We'll add it with $autoload set to 'no'.
+			    $deprecated = null;
+			    $autoload = 'yes';
+			    add_option( $option_name, $new_value, $deprecated, $autoload );
+			}
+
+		}
+
 	}
 	
 }
