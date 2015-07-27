@@ -28,6 +28,7 @@ $client_detail = '<table style="padding:5px;">
 				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF">'. __('Contant Person','dxinvoice').' :<span class="" data-contactperson > '.$dx_client_name.'</span></td></tr>
 				  </tbody>
 				</table>';
+				
 $other_bank_account = '';
 if($dx_company_bank_ac_number_other)
 {

@@ -33,6 +33,7 @@ if( !defined( 'DX_PREFIX' ) ) {
 if( !defined( 'DX_INVOICE_CUSTOMER_ROLE' ) ) {
 	define( 'DX_INVOICE_CUSTOMER_ROLE', 'dx_customer_role' ); // plugin dir
 }
+
 //Get Customer Role
 if( !defined( 'DX_CUSTOMER_ROLE' ) ) {
 	define( 'DX_CUSTOMER_ROLE', 'dx_customer_role' ); //plugin vendor role
@@ -321,3 +322,4 @@ if( !class_exists( 'DX_Invoicer' ) ) {
 	
 	new DX_Invoicer();
 }
+
