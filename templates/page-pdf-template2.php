@@ -6,6 +6,11 @@ Compitible Browser : IE-8, Google Crome, Mozillafirefox-15.0.1
 */
 $count = 0;
 $number = 1;
+$other_bank_account = '';
+foreach ($dx_company_bank_ac_number_other as $key => $bank_number) {
+	$other_bank_account .= '<br/>'.$bank_number	;			
+}
+
 ?>
 
 <table width="100%" class="table table-hover" data-post-id="<?php echo $post->ID; ?>">
@@ -23,7 +28,7 @@ $number = 1;
 						</table>					
 					</td>
 					<td width="30%">
-						<table align="left" width="100%" style="font-size: 54px; color: rgb(255, 255, 255);">
+						<table align="left" width="100%" style="font-size: 40px; color: rgb(255, 255, 255);">
 							<tbody>
 								<tr><td><?php echo $dx_setting_company_website; ?></td></tr>
 								<tr><td><?php echo $dx_setting_company_email; ?></td></tr>
@@ -78,7 +83,7 @@ $number = 1;
 						<table style="font-size:28px;padding:5px;">
 							<tr><td><?php echo __('DATE :','dxinvoice'); ?> 13/5/2014</td></tr>
 							<tr><td><?php echo __('INVOICE NUMBER :','dxinvoice'); ?> <?php echo  $dx_invoice_number; ?></td></tr>
-							<tr><td><?php echo __('ACCOUNT NUMBER :','dxinvoice'); ?><span> <?php echo $dx_bank_account; ?></span> </td></tr>
+							<tr><td><?php echo __('ACCOUNT NUMBER :','dxinvoice'); ?><span> <?php echo $dx_setting_company_bank_ac_number.$other_bank_account; ?></span> </td></tr>
 							<tr><td bgcolor="#F83E3F" style="font-size:48px; background:#F83E3F;"><?php echo __('TOTAL  :','dxinvoice'); ?> <span class="dx-final-total"><?php echo number_format((float)$dx_final_total, 2, '.', ''); ?></span> </td></tr>
 						</table>
 					</td>
@@ -128,26 +133,26 @@ $number = 1;
 						<img align="left" src="<?php echo $dx_invoice_signature_img;  ?>"alt="" width="90" height="40"><br><br><?php echo  __('Signature','dxinvoice'); } ?>
 					</td>
 					<td colspan="2">
-						<table bgcolor="Red" align="center" cellspacing="5" style="color:#fff; font-size:34px; font-weight:bold;" width="100%">
+						<table bgcolor="Red" align="center" cellspacing="5" style="color:#fff; font-size:28px; font-weight:bold;" width="100%">
 							<tr>
-								<td><?php echo  __('Subtotal','dxinvoice'); ?></td>
+								<td align="left" width="40%"><?php echo  __('Subtotal','dxinvoice'); ?></td>
 								<td></td>
-								<td align="right" class="dx-net-amount"><?php echo number_format((float)$invoice_net, 2, '.', ''); ?></td>
+								<td width="30%" align="right" class="dx-net-amount"><?php echo number_format((float)$invoice_net, 2, '.', ''); ?></td>
 							</tr>
 							<tr>
-								<td><?php echo  __('Discount','dxinvoice'); ?></td>
+								<td align="left" width="40%"><?php echo  __('Discount','dxinvoice'); ?></td>
 								<td></td>
-								<td align="right" class="dx-discount-all"><?php echo number_format((float)$invoice_discount, 2, '.', ''); ?></td>
+								<td width="30%" align="right" class="dx-discount-all"><?php echo number_format((float)$invoice_discount, 2, '.', ''); ?></td>
 							</tr>
 							<tr>
-								<td><?php echo  __('Tax','dxinvoice'); ?></td>
+								<td align="left" width="40%"><?php echo  __('Tax','dxinvoice'); ?></td>
 								<td align="right" class="dx-vat changable-text" ><?php echo $dx_vat_text."%"; ?></td>
-								<td align="right" class="dx-vat-amount"><?php echo number_format((float)$vat_amount, 2, '.', ''); ?></td>
+								<td width="30%" align="right" class="dx-vat-amount"><?php echo number_format((float)$vat_amount, 2, '.', ''); ?></td>
 							</tr>
 							<tr>
-								<td><?php echo  __('Total','dxinvoice'); ?></td>
+								<td align="left" width="40%"><?php echo  __('Total','dxinvoice'); ?></td>
 								<td></td>
-								<td align="right" class="dx-final-total"><?php echo number_format((float)$dx_final_total, 2, '.', ''); ?></td>
+								<td width="30%" align="right" class="dx-final-total"><?php echo number_format((float)$dx_final_total, 2, '.', ''); ?></td>
 							</tr>
 						</table>
 					</td>

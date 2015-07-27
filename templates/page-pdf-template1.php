@@ -9,7 +9,7 @@ Compitible Browser : IE-8, Google Crome, Mozillafirefox-15.0.1
 $dx_invoice_detail = '<table width="100%" border="0" style="padding:5px; ">
           <tbody><tr><td style="font-size:54px; font-weight:bold;" class="invoice-label" colspan="2">'. __('Invoice','dxinvoice').'</td></tr>
           <tr style="font-size:28px;">
-            <td style="text-align:right;">'. __('Date of financial event:','dxinvoice').'</td><td style="text-align:right; margin-right:20px;">'.date("d.m.Y").'</td>
+            <td style="text-align:right;">'. __('Date of financial event:','dxinvoice').'</td><td style="text-align:right; margin-right:20px;">'.date('d.m.Y',strtotime($dx_date_of_execution)).'</td>
           </tr>
           <tr style="font-size:28px;">
             <td style="text-align:right;">'. __('Issued at:','dxinvoice').'</td><td style="text-align:right; margin-right:20px;">-</td>

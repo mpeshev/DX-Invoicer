@@ -93,7 +93,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 	$dx_company_address   		= 	get_post_meta($dx_client,'_company_address',true);
 	$dx_company_number   		= 	get_post_meta($dx_client,'_company_number',true);
 	$dx_client_name   			= 	get_post_meta($dx_client,'_client_name',true);
-	$dx_date_of_execution		= 	get_post_meta($dx_client,'_date_of_execution',true);
+	$dx_date_of_execution		= 	get_post_meta($post_id,'_date_of_execution',true);
 	$dx_bank_account   			= 	get_post_meta($dx_client,'_bank_account',true);
 	// Template Start
 	ob_start();
