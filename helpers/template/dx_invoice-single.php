@@ -72,11 +72,18 @@ global $post;
 	$dx_company_address   		= 	get_post_meta($dx_client,'_company_address',true);
 	$dx_company_number   		= 	get_post_meta($dx_client,'_company_number',true);
 	$dx_client_name   			= 	get_post_meta($dx_client,'_client_name',true);
+	$dx_date_of_execution		= 	get_post_meta($dx_client,'_date_of_execution',true);
 	$dx_bank_account   			= 	get_post_meta($dx_client,'_bank_account',true);
-	
+
+	//Other bank Account
+
+	$dx_company_bank_ac_number_other = get_option('dx_company_bank_ac_number_other');
+
 	// Company Detail 
 	$dx_setting_person_name 				= 	$dx_invoice_options['dx_company_person'];
 	$dx_setting_company_name 				= 	$dx_invoice_options['dx_company_name'];
+	$dx_setting_company_website				= 	$dx_invoice_options['dx_company_website'];
+	$dx_setting_company_email 				= 	$dx_invoice_options['dx_company_email'];
 	$dx_setting_company_address 			= 	$dx_invoice_options['dx_company_address'];
 	$dx_setting_company_unique_number 		= 	$dx_invoice_options['dx_company_unique_number'];
 	$dx_setting_company_responsible_person 	= 	$dx_invoice_options['dx_company_responsible_person'];
@@ -99,30 +106,31 @@ global $post;
 <body bgcolor="#FFFFFF" text="#000000" link="#FF9966" vlink="#FF9966" alink="#FFCC99">
 
 <?php	
-		
-		
-		$dx_filepath = DX_INV_DIR.'/helpers/page-single-invoice/'.$dx_templates;
-		
-		if(file_exists($dx_filepath)){
-			if(is_file($dx_filepath)){
-				try{
-					?>
-					<div class="container">
-						<h1 align="center">Invoice</h1>
-						<p align="right" class="editable disable">Click to see editable field</p>
-						<?php require_once($dx_filepath); ?>
-					</div>
-					<?php
-				}
-				catch (Exception $e)
-				{
-					echo "Error : ". $e;
-				}
+	$dx_filepath = DX_INV_DIR.'/templates/'.$dx_templates;
+	
+	if(file_exists($dx_filepath)){
+		if(is_file($dx_filepath)){
+			try{
+				?>
+				<div class="container">
+					<h1 align="center">Invoice</h1>
+					<p align="right" class="editable disable">Click to see editable field</p>
+					<?php require_once($dx_filepath); ?>
+				</div>
+				<?php
+			}
+			catch (Exception $e)
+			{
+				echo "Error : ". $e;
 			}
 		}else 
 		{
 			echo "Template Not Exist";
 		}
+	}else 
+	{
+		echo "Template Not Exist";
+	}
 ?>
 <div class="wrapbutton">
 <button id="saveInvoice">Save Invoice</button><button id="saveandGenerate">Save & Generate PDF</button><span><a id="pdf-download" href="">Download PDF</a></span></div>

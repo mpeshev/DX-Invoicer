@@ -24,7 +24,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 		
 	<form  method="post" action="options.php">		
 		<?php
-			$files= DX_INV_DIR."/helpers/page-single-invoice";
+			$files= DX_INV_DIR."/templates";
 			$dir = "";
 			$dx_google_callback_url = add_query_arg( array( 'page' => 'dx_invoice_google_settings'), admin_url( 'admin.php' ) ); 
 			$pred = scandir($files);
@@ -53,6 +53,8 @@ if ( !defined( 'ABSPATH' ) ) exit;
 			/*	Company Detail		*/
 			$dx_company_person 			= isset($dx_invoice_options['dx_company_person'])?$dx_invoice_options['dx_company_person']:"";
 			$dx_company_name 			= isset($dx_invoice_options['dx_company_name'])?$dx_invoice_options['dx_company_name']:"";
+			$dx_company_email 			= isset($dx_invoice_options['dx_company_email'])?$dx_invoice_options['dx_company_email']:"";
+			$dx_company_website			= isset($dx_invoice_options['dx_company_website'])?$dx_invoice_options['dx_company_website']:"";
 			$dx_company_address 		= isset($dx_invoice_options['dx_company_address'])?$dx_invoice_options['dx_company_address']:"";
 			$dx_company_unique_number	= isset($dx_invoice_options['dx_company_unique_number'])?$dx_invoice_options['dx_company_unique_number']:"";
 			$dx_company_responsible_person	= isset($dx_invoice_options['dx_company_responsible_person'])?$dx_invoice_options['dx_company_responsible_person']:"";
@@ -209,6 +211,23 @@ if ( !defined( 'ABSPATH' ) ) exit;
 												</th>
 												<td><input type="text" id="dx-company-name"  name="dx_invoice_options[dx_company_name]" value="<?php echo $dx_company_name; ?>" size="63" /><br />
 													<span class="description"><?php echo __( 'Enter Company Name', 'dxinvoice' ) ?></span>
+												</td>
+											 </tr>
+											 <tr>
+												<th scope="row">
+													<label for="dx-company-address"><strong><?php echo __( 'Company Website Address', 'dxinvoice' ) ?></strong></label>
+												</th>
+												<td><input type="text" id="dx-company-name"  name="dx_invoice_options[dx_company_website]" value="<?php echo $dx_company_website; ?>" size="63" /><br />
+													<span class="description"><?php echo __( 'Enter Company Website Address', 'dxinvoice' ) ?></span>
+												</td>
+											 </tr>
+
+											 <tr>
+												<th scope="row">
+													<label for="dx-company-address"><strong><?php echo __( 'Company Email Address', 'dxinvoice' ) ?></strong></label>
+												</th>
+												<td><input type="text" id="dx-company-name"  name="dx_invoice_options[dx_company_email]" value="<?php echo $dx_company_email; ?>" size="63" /><br />
+													<span class="description"><?php echo __( 'Enter Company Email Address', 'dxinvoice' ) ?></span>
 												</td>
 											 </tr>
 											 <tr>

@@ -28,6 +28,10 @@ $client_detail = '<table style="padding:5px;">
 				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF">'. __('Contant Person','dxinvoice').' :<span class="changable-text" data-contactperson > '.$dx_client_name.'</span></td></tr>
 				  </tbody>
 				</table>';
+$other_bank_account = '';
+foreach ($dx_company_bank_ac_number_other as $key => $bank_number) {
+	$other_bank_account .= '<tr style="font-size:28px; background-color:#CCCCFF;" ><td><span class="" data-setting-account>'.$bank_number.'</span></td></tr>'	;			
+}
 
 $customer_detail = '<table style="padding:5px;">
 				    <tbody><tr style="padding:10px 0;" class="client-title">
@@ -37,7 +41,8 @@ $customer_detail = '<table style="padding:5px;">
 				<span class="changable-textarea" data-customercomaddr>'.$dx_setting_company_address.'</span></td></tr>
 				    <tr style="font-size:28px; background-color:#CCCCFF;" ><td>'. __('ID No.','dxinvoice').'<span class="changable-text" data-customercomidno>'.$dx_setting_company_unique_number.'</span></td></tr>
 				    <tr style="font-size:28px; background-color:#CCCCFF;" ><td>'. __('Contant Person : ','dxinvoice').'<span class="changable-text" data-customercomcontactp>'.$dx_setting_company_responsible_person.'</span></td></tr>
-				    <tr style="font-size:28px; background-color:#CCCCFF;" ><td>'. __('Contant Person : ','dxinvoice').'<span class="changable-text" data-setting-account>'.$dx_setting_company_bank_ac_number.'</span></td></tr>
+				    <tr style="font-size:28px; background-color:#CCCCFF;" ><td>'. __('Bank Account : ','dxinvoice').'<span class="changable-text" data-setting-account>'.$dx_setting_company_bank_ac_number.'</span></td></tr>
+				  	'.$other_bank_account.'
 				  </tbody>
 				</table>';
 ?>
@@ -66,7 +71,7 @@ $customer_detail = '<table style="padding:5px;">
 		<td width="12%"><?php echo  __('Total ( USD )','dxinvoice'); ?></td>
 	</tr>
 	<tr>
-		<td colspan="7" height="420px" valign="top">
+		<td colspan="7" valign="top">
 			<table border="1" width="100%" class="table table-hover">
 				<tbody class="table-calc">
 				<?php foreach ($dx_top_custom_value as $invoice_row){
@@ -119,13 +124,7 @@ $customer_detail = '<table style="padding:5px;">
 		<td colspan="2"><?php echo  __('VAT regulations as per Article 21 (2)','dxinvoice'); ?></td>
 		<td></td>
 	</tr>
-	<tr style="font-size:30px; text-align:center;" valign="middle">
-		<td colspan="2" align="left"><?php echo  __('Client :','dxinvoice'); ?></td>
-		<td colspan="2" rowspan="2"></td>
-		<td colspan="2"><?php echo  __('Created by:','dxinvoice'); ?></td>
-		<td rowspan="2" align="center"><?php if(!empty($dx_invoice_signature_img)){ ?> 
-			<img align="left" src="<?php echo $dx_invoice_signature_img;  ?>"alt="" width="90" height="40"><?php echo  __('Signature','dxinvoice'); } ?> </td>
-	</tr>
+
 	<tr style="font-size:30px; text-align:center;">
 		
 		<td colspan="2"><?php echo  $dx_customer_name; ?></td>
@@ -144,6 +143,17 @@ $customer_detail = '<table style="padding:5px;">
 		<td colspan="2" align="left">BIC: - </td>
 		<td colspan="2"><?php echo  __('IBAN:','dxinvoice')."<span class='changable-text' data-bankacc>".$dx_bank_account; ?></span></td>
 		<td></td>
+	</tr>
+	</tbody>
+</table>
+<table>
+<tbody>
+	<tr style="font-size:30px; text-align:center;" valign="middle">
+		<td colspan="2" align="left"><?php echo  __('Client :','dxinvoice'); ?></td>
+		<td colspan="2" rowspan="2"></td>
+		<td colspan="2"><?php echo  __('Created by:','dxinvoice'); ?></td>
+		<td rowspan="2" align="center"><?php if(!empty($dx_invoice_signature_img)){ ?> 
+			<img align="left" src="<?php echo $dx_invoice_signature_img;  ?>"alt="" width="90" height="40"><?php echo  __('Signature','dxinvoice'); } ?> </td>
 	</tr>
 	</tbody>
 </table>

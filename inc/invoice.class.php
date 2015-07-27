@@ -438,13 +438,23 @@ function dx_updated_messages( $messages ) {
 		$preview = "";
 		$preview1 = "";
 	    if( DX_INV_POST_TYPE == $post->post_type ){
-	       $preview = add_query_arg( array( 'post_type' => DX_INV_POST_TYPE, 'dx_action_validate' => 'generate-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' ) ); 
-	       $preview1 = add_query_arg( array( 'post_type' => DX_INV_POST_TYPE, 'dx_action_validate' => 'download-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' ) ); 
+			$dxinvoice_item_row_data = get_post_meta($post->ID,'dx_invoice_items',true);
+			if($dxinvoice_item_row_data)
+			{
+		       	$preview  = add_query_arg( array( 'post_type' => DX_INV_POST_TYPE, 'dx_action_validate' => 'generate-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' ) ); 
+		       	$preview1 = add_query_arg( array( 'post_type' => DX_INV_POST_TYPE, 'dx_action_validate' => 'download-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' ) ); 
+				$disabled = '';
+			}else{
+		       	$preview  = 'javascript: void(0)'; 
+		       	$preview1 = 'javascript: void(0)';
+				$disabled = 'disabled';
+			}
+	        
 	        echo '	
-	        		<a type="submit" class="dx-pdf-generate button" id="" href="'.$preview.'">'.__('Preview Invoice','dxinvoice').'</a>
+	        		<a type="submit" class="dx-pdf-generate button '.$disabled.'" id="" href="'.$preview.'">'.__('Preview Invoice','dxinvoice').'</a>
 	        	';
 	        echo '	
-	        		<a type="submit" class="dx-pdf-generate button" id="" href="'.$preview1.'">'.__('Download Invoice','dxinvoice').'</a>
+	        		<a type="submit" class="dx-pdf-generate button '.$disabled.'" id="" href="'.$preview1.'">'.__('Download Invoice','dxinvoice').'</a>
 	        	';
 	    }
 	}
@@ -872,7 +882,7 @@ function dx_updated_messages( $messages ) {
 		if( ! is_single() || DX_INV_POST_TYPE != get_post_type() )
 			return $template;
 		
-			$single = DX_INV_DIR . '/template/' . DX_INV_POST_TYPE . '-single.php';
+			$single = DX_INV_DIR . '/helpers/template/' . DX_INV_POST_TYPE . '-single.php';
 			
 		if( ! file_exists( $single ) )
 			return $template;
@@ -991,8 +1001,11 @@ function dx_updated_messages( $messages ) {
 			$updateval[$i]['total'] 				= $total[$i];
 		}
 
+
+
 		$action = isset($_POST['action'])?$_POST['action']:"";
 		if($action == 'dx_invoice_update'){
+
 
 			$post_id 				=	isset($_POST['dx_page_id'])			?$_POST['dx_page_id']		:"";
 	    	$dx_clientname 			= 	isset($_POST['dx_clientname'])		?$_POST['dx_clientname']	:"" ;
@@ -1015,22 +1028,25 @@ function dx_updated_messages( $messages ) {
 								      'post_title' => $dx_clientname
 			  );
 			update_post_meta( $post_id, 'dx_invoice_items', $updateval );   
+
 			update_post_meta( $post_id, '_vat_text', str_replace("%","", $vat_value) );   
 		    wp_update_post( $customer_post );
+
+/*
 		    update_post_meta( $customerid, '_bank_account', $data_bankacc );
 		    update_post_meta( $customerid, '_company_name', $data_clientcompany );
 		    update_post_meta( $customerid, '_company_address', $data_clientcomaddr );
 		    update_post_meta( $customerid, '_company_number', $data_clientcomnum );
-		    update_post_meta( $customerid, '_client_name', $data_contactperson );
-		   
-		    $dx_invoice_options['dx_company_person'] 			= $data_customername;
+		    update_post_meta( $customerid, '_client_name', $data_contactperson );		   
+*/
+/*		    $dx_invoice_options['dx_company_person'] 			= $data_customername;
 		    $dx_invoice_options['dx_company_name'] 				= $data_customercomname;
 		    $dx_invoice_options['dx_company_address'] 			= $data_customercomaddr;
 	    	$dx_invoice_options['dx_company_unique_number'] 	= $data_customercomidno;
 		    $dx_invoice_options['dx_company_responsible_person']= $data_customercomcontactp;
 		    $dx_invoice_options['dx_company_bank_ac_number'] 	= $data_setting_account;
 
-		    update_option('dx_invoice_options',$dx_invoice_options);
+		    update_option('dx_invoice_options',$dx_invoice_options);*/
 		    
 		    if(isset($_POST['buttonevent']) && $_POST['buttonevent'] == 'saveandGenerate'){
 		    	$preview1 = add_query_arg( array( 'post_type' => DX_INV_POST_TYPE, 'dx_action_validate' => 'download-pdf', 'post_ID' => $post_id ), admin_url( 'edit.php' ) ); 

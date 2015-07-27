@@ -337,7 +337,7 @@ class DX_Form_Filters {
 			$initial_rows = 0;
 			$current_user_id = get_current_user_id();
 			
-			$files= DX_INV_DIR."/helpers/page-single-invoice";
+			$files= DX_INV_DIR."/templates";
 			$dir = "";
 			$pred = scandir($files);
 			 foreach ($pred as $key => $rowvalue)

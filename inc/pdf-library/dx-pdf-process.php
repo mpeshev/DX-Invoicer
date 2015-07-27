@@ -70,11 +70,18 @@ if ( !defined( 'ABSPATH' ) ) exit;
 	// Company Detail 
 	$dx_setting_person_name 				= 	$dx_invoice_options['dx_company_person'];
 	$dx_setting_company_name 				= 	$dx_invoice_options['dx_company_name'];
+	$dx_setting_company_website				= 	$dx_invoice_options['dx_company_website'];
+	$dx_setting_company_email 				= 	$dx_invoice_options['dx_company_email'];
 	$dx_setting_company_address 			= 	$dx_invoice_options['dx_company_address'];
 	$dx_setting_company_unique_number 		= 	$dx_invoice_options['dx_company_unique_number'];
 	$dx_setting_company_responsible_person 	= 	$dx_invoice_options['dx_company_responsible_person'];
 	$dx_setting_company_bank_ac_number	 	= 	$dx_invoice_options['dx_company_bank_ac_number'];
 	
+
+	//Other bank Account
+
+	$dx_company_bank_ac_number_other = get_option('dx_company_bank_ac_number_other');
+
 	// Customer Detail
 	$custdata					=	get_post($dx_client);
 	
@@ -86,6 +93,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 	$dx_company_address   		= 	get_post_meta($dx_client,'_company_address',true);
 	$dx_company_number   		= 	get_post_meta($dx_client,'_company_number',true);
 	$dx_client_name   			= 	get_post_meta($dx_client,'_client_name',true);
+	$dx_date_of_execution		= 	get_post_meta($dx_client,'_date_of_execution',true);
 	$dx_bank_account   			= 	get_post_meta($dx_client,'_bank_account',true);
 	// Template Start
 	ob_start();
@@ -93,8 +101,8 @@ if ( !defined( 'ABSPATH' ) ) exit;
 		$templates = isset($dx_invoice_options['page_template'])?$dx_invoice_options['page_template']:"";
 	}
 	if(!empty($templates)){	
-		if(file_exists(DX_INV_DIR.'/helpers/page-single-invoice/'.$templates)){
-			require_once DX_INV_DIR.'/helpers/page-single-invoice/'.$templates;
+		if(file_exists(DX_INV_DIR.'/templates/'.$templates)){
+			require_once DX_INV_DIR.'/templates/'.$templates;
 		}else 
 		{
 			echo "Template Not Exist";
