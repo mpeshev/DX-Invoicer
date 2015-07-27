@@ -20,28 +20,31 @@ $dx_invoice_detail = '<table width="100%" border="0" style="padding:5px; ">
       	</tbody></table>';
 
 $client_detail = '<table style="padding:5px;">
-				    <tbody><tr class="client-title"><td class="changable-text" data-clientname="'.$dx_client.'">'. $dx_customer_name.'</td></tr>
-				    <tr style="font-size:38px; color:#7F7F7F;"><td style="padding:10px 0;"><b class="changable-text" data-clientcompany >'.$dx_company_name.'</b></td></tr>
-				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF"><b>'. __('Address:','dxinvoice').'</b><span class="changable-textarea" data-clientcomaddr> 
+				    <tbody><tr class="client-title"><td class="" data-clientname="'.$dx_client.'">'. $dx_customer_name.'</td></tr>
+				    <tr style="font-size:38px; color:#7F7F7F;"><td style="padding:10px 0;"><b class="" data-clientcompany >'.$dx_company_name.'</b></td></tr>
+				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF"><b>'. __('Address:','dxinvoice').'</b><span class="" data-clientcomaddr> 
 				'.$dx_company_address.'</span></td></tr>
-				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF">'. __('ID No.:','dxinvoice').'<span class="changable-text" data-clientcomnum>'. $dx_company_number.'</span></td></tr>
-				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF">'. __('Contant Person','dxinvoice').' :<span class="changable-text" data-contactperson > '.$dx_client_name.'</span></td></tr>
+				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF">'. __('ID No.:','dxinvoice').'<span class="" data-clientcomnum>'. $dx_company_number.'</span></td></tr>
+				    <tr style="font-size:28px;"><td bgcolor="#CCCCFF">'. __('Contant Person','dxinvoice').' :<span class="" data-contactperson > '.$dx_client_name.'</span></td></tr>
 				  </tbody>
 				</table>';
 $other_bank_account = '';
-foreach ($dx_company_bank_ac_number_other as $key => $bank_number) {
-	$other_bank_account .= '<tr style="font-size:28px; background-color:#CCCCFF;" ><td><span class="" data-setting-account>'.$bank_number.'</span></td></tr>'	;			
+if($dx_company_bank_ac_number_other)
+{
+	foreach ($dx_company_bank_ac_number_other as $key => $bank_number) {
+		$other_bank_account .= '<tr style="font-size:28px; background-color:#CCCCFF;" ><td><span class="" data-setting-account>'.$bank_number.'</span></td></tr>'	;			
+	}	
 }
 
 $customer_detail = '<table style="padding:5px;">
 				    <tbody><tr style="padding:10px 0;" class="client-title">
-				    <td class="changable-text" data-customername>'.$dx_setting_person_name.'</td></tr>
-				    <tr style="font-size:38px;"><td style="padding:10px 0; color:#7F7F7F;"><b data-customercomname class="changable-text">'.$dx_setting_company_name.'</b></td></tr>
+				    <td class="" data-customername>'.$dx_setting_person_name.'</td></tr>
+				    <tr style="font-size:38px;"><td style="padding:10px 0; color:#7F7F7F;"><b data-customercomname class="">'.$dx_setting_company_name.'</b></td></tr>
 				    <tr style="font-size:28px; background-color:#CCCCFF;"><td><b>'. __('Address:','dxinvoice').'</b>
-				<span class="changable-textarea" data-customercomaddr>'.$dx_setting_company_address.'</span></td></tr>
-				    <tr style="font-size:28px; background-color:#CCCCFF;" ><td>'. __('ID No.','dxinvoice').'<span class="changable-text" data-customercomidno>'.$dx_setting_company_unique_number.'</span></td></tr>
-				    <tr style="font-size:28px; background-color:#CCCCFF;" ><td>'. __('Contant Person : ','dxinvoice').'<span class="changable-text" data-customercomcontactp>'.$dx_setting_company_responsible_person.'</span></td></tr>
-				    <tr style="font-size:28px; background-color:#CCCCFF;" ><td>'. __('Bank Account : ','dxinvoice').'<span class="changable-text" data-setting-account>'.$dx_setting_company_bank_ac_number.'</span></td></tr>
+				<span class="" data-customercomaddr>'.$dx_setting_company_address.'</span></td></tr>
+				    <tr style="font-size:28px; background-color:#CCCCFF;" ><td>'. __('ID No.','dxinvoice').'<span class="" data-customercomidno>'.$dx_setting_company_unique_number.'</span></td></tr>
+				    <tr style="font-size:28px; background-color:#CCCCFF;" ><td>'. __('Contant Person : ','dxinvoice').'<span class="" data-customercomcontactp>'.$dx_setting_company_responsible_person.'</span></td></tr>
+				    <tr style="font-size:28px; background-color:#CCCCFF;" ><td>'. __('Bank Account : ','dxinvoice').'<span class="" data-setting-account>'.$dx_setting_company_bank_ac_number.'</span></td></tr>
 				  	'.$other_bank_account.'
 				  </tbody>
 				</table>';
@@ -68,7 +71,7 @@ $customer_detail = '<table style="padding:5px;">
 		<td width="9%"><?php echo  __('Qty','dxinvoice'); ?></td>
 		<td width="15%"><?php echo  __('Net','dxinvoice'); ?></td>
 		<td width="14%"><?php echo  __('Discount','dxinvoice'); ?></td>
-		<td width="12%"><?php echo  __('Total ( USD )','dxinvoice'); ?></td>
+		<td width="12%"><?php echo  __('Total ( '.strtoupper($dx_currency).' )','dxinvoice'); ?></td>
 	</tr>
 	<tr>
 		<td colspan="7" valign="top">
@@ -141,7 +144,7 @@ $customer_detail = '<table style="padding:5px;">
 		<td>&nbsp;</td>
 		<td><?php echo  __('First Investment Bank','dxinvoice'); ?></td>
 		<td colspan="2" align="left">BIC: - </td>
-		<td colspan="2"><?php echo  __('IBAN:','dxinvoice')."<span class='changable-text' data-bankacc>".$dx_bank_account; ?></span></td>
+		<td colspan="2"><?php echo  __('IBAN:','dxinvoice')."<span class='' data-bankacc>".$dx_bank_account; ?></span></td>
 		<td></td>
 	</tr>
 	</tbody>

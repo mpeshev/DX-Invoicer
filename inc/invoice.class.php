@@ -41,7 +41,7 @@ class DX_Invoice_Class {
 						'label' => __('Currency', 'dxinvoice'),
 						'type' => 'select',
 						'desc' => 'Select Currency',
-						'options' => apply_filters('dx_setting_currency','dxinvoice')
+						'options' => apply_filters('dx_invoice_setting_currency','dxinvoice')
 				),
 				'_description' => array(
 						'label' => __('Details of the payment', 'dxinvoice'),

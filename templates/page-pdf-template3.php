@@ -7,9 +7,13 @@ Compitible Browser : IE-8, Google Crome, Mozillafirefox-15.0.1
 $count = 0;
 $number = 1;
 $other_bank_account = '';
-foreach ($dx_company_bank_ac_number_other as $key => $bank_number) {
-	$other_bank_account .= '<br/>'.$bank_number	;			
+if($dx_company_bank_ac_number_other)
+{
+	foreach ($dx_company_bank_ac_number_other as $key => $bank_number) {
+		$other_bank_account .= '<br/>'.$bank_number	;			
+	}	
 }
+
 ?>
 <style>
 table { /* Will apply to all tables */
@@ -139,7 +143,7 @@ table { /* Will apply to all tables */
 					<td width="15%" ><?php echo __('QUANTITY','dxinvoice'); ?></td>
 					<td width="15%" ><?php echo __('PRICE','dxinvoice'); ?></td>
 					<td width="15%" ><?php echo __('DISCOUNT','dxinvoice'); ?></td>
-					<td width="15%" ><?php echo __('TOTAL','dxinvoice'); ?></td>
+					<td width="15%" ><?php echo __('TOTAL ( '.strtoupper($dx_currency).' )','dxinvoice'); ?></td>
 				</tr>
 			</table>
 		</td>

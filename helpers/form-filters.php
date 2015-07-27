@@ -30,7 +30,7 @@ class DX_Form_Filters {
 		add_action( 'admin_init', array( $this, 'dx_customer_set_user_metaboxes' ), 10, 6 );
 		add_action( 'admin_init', array( $this, 'dx_invoice_set_user_metaboxes' ), 10, 6 );
 		add_action( 'admin_init', array( $this, 'save_options' ), 10, 6 );
-		add_filter( 'dx_setting_currency' ,array( $this, 'set_currency' ), 10, 6 );
+		add_filter( 'dx_invoice_setting_currency' ,array( $this, 'set_currency' ), 10, 6 );
 	}
 	
 	/**
