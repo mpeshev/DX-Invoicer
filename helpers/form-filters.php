@@ -30,6 +30,7 @@ class DX_Form_Filters {
 		add_action( 'admin_init', array( $this, 'dx_customer_set_user_metaboxes' ), 10, 6 );
 		add_action( 'admin_init', array( $this, 'dx_invoice_set_user_metaboxes' ), 10, 6 );
 		add_action( 'admin_init', array( $this, 'save_options' ), 10, 6 );
+		add_filter( 'dx_setting_currency' ,array( $this, 'set_currency' ), 10, 6 );
 	}
 	
 	/**
@@ -470,6 +471,20 @@ class DX_Form_Filters {
 
 		}
 
+	}
+
+	/**
+	 * filter to change currency
+	 * @return array
+	 */
+	public function set_currency()
+	{
+		return array(
+				'bgn' => __('BGN', 'dxinvoice'),
+				'eur' => __('EUR', 'dxinvoice'),
+				'usd' => __('USD', 'dxinvoice'),
+				'idr' => __('IDR', 'dxinvoice')
+		);
 	}
 	
 }

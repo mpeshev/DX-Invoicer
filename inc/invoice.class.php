@@ -41,11 +41,7 @@ class DX_Invoice_Class {
 						'label' => __('Currency', 'dxinvoice'),
 						'type' => 'select',
 						'desc' => 'Select Currency',
-						'options' => array(
-								'bgn' => __('BGN', 'dxinvoice'),
-								'eur' => __('EUR', 'dxinvoice'),
-								'usd' => __('USD', 'dxinvoice')
-						)
+						'options' => apply_filters('dx_setting_currency','dxinvoice')
 				),
 				'_description' => array(
 						'label' => __('Details of the payment', 'dxinvoice'),
@@ -126,7 +122,8 @@ class DX_Invoice_Class {
 			));
 			flush_rewrite_rules();
 	}
-	
+
+
 	/**
  * Message Filter
  *
