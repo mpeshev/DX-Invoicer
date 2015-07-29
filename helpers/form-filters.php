@@ -341,20 +341,15 @@ class DX_Form_Filters {
 			$files= DX_INV_DIR."/templates";
 			$dir = "";
 			$pred = scandir($files);
-			 foreach ($pred as $key => $rowvalue)
-			   {
-			      if (!in_array($rowvalue,array(".","..")))
-			      {
-			         if (is_dir($dir . DIRECTORY_SEPARATOR . $rowvalue))
-			         {
-			            $result[$rowvalue] = dirToArray($dir . DIRECTORY_SEPARATOR . $rowvalue);
-			         }
-			         else
-			         {
-			            $result[] = $rowvalue;
-			         }
-			      }
-			   } 
+			foreach ($pred as $key => $rowvalue){
+				if (!in_array($rowvalue,array(".",".."))){
+					if (is_dir($dir . DIRECTORY_SEPARATOR . $rowvalue)){
+						$result[$rowvalue] = dirToArray($dir . DIRECTORY_SEPARATOR . $rowvalue);
+					}else{
+						$result[] = $rowvalue;
+					}
+				}
+			} 
 			ob_start();
 			
 			?>
@@ -463,7 +458,7 @@ class DX_Form_Filters {
 
 			} else {
 
-			    // The option hasn't been added yet. We'll add it with $autoload set to 'no'.
+			    // The option hasn't been added yet. We'll add it with $autoload set to 'yes'.
 			    $deprecated = null;
 			    $autoload = 'yes';
 			    add_option( $option_name, $new_value, $deprecated, $autoload );
@@ -477,8 +472,7 @@ class DX_Form_Filters {
 	 * filter to change currency
 	 * @return array
 	 */
-	public function set_currency($currency = array())
-	{
+	public function set_currency($currency = array()){
 
 		$currency['bgn'] = __('BGN', 'dxinvoice');
 		$currency['eur'] = __('EUR', 'dxinvoice');

@@ -160,7 +160,7 @@ table { /* Will apply to all tables */
 					<td width="15%" class="changable-text dx-quantity"><?php echo  $invoice_row['quantity'] ?></td>
 					<td width="15%" class="dx-net"><?php echo  $invoice_row['net'] ?></td>
 					<td width="15%" class="changable-text  dx-discount"><?php echo  $invoice_row['discount'] ?></td>
-					<td width="15%"  class="dx-total"><?php echo  $invoice_row['total'] ?></td>
+					<td width="15%" class="dx-total"><?php echo  $invoice_row['total'] ?></td>
 				</tr>
 			<?php  $number++;
 			if($count == 1)

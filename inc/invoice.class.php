@@ -678,12 +678,12 @@ function dx_updated_messages( $messages ) {
 	            $query->set('meta_query', array(
 	                array(
 	                    'key'       => '_client',
-	                    'value'     => $_GET['customer_id'],
+	                    'value'     => htmlspecialchars($_GET['customer_id']),
 	                    'compare'   => '='
 	                ),
 	                array(
 	                    'key'       => '_dx_status_invoice',
-	                    'value'     => $_GET['invoice_status'],
+	                    'value'     => htmlspecialchars($_GET['invoice_status']),
 	                    'compare'   => '='
 	                )
 	            ));
@@ -692,21 +692,6 @@ function dx_updated_messages( $messages ) {
 	        }
     	
 	    }
-	}
-
-	/**
-	 * add query 
-	 * @param type $where 
-	 * @return query
-	 */
-	public function my_custom_posts_where( $where = '' )
-	{
-
-	    global $wpdb;
-
-	    remove_filter('posts_where', 'my_custom_posts_where');
-	    
-	    return $where;
 	}
 
 	/**
