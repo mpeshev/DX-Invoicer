@@ -575,7 +575,7 @@ function dx_updated_messages( $messages ) {
 					<?php 
 					foreach ($r_customer as $key => $_customer) {
 						?>
-						<option id="customer_<?php echo $_customer->ID; ?>" value="<?php echo $_customer->ID; ?>" <?php echo ($_customer->ID == $customer_id ? 'selected' : '' ) ?>><?php echo $_customer->post_title; ?></option>
+						<option id="customer_<?php echo $_customer->ID; ?>" value="<?php echo $_customer->ID; ?>" <?php selected($_customer->ID, $customer_id ); ?>><?php echo $_customer->post_title; ?></option>
 						<?php
 					}
 					?>
@@ -615,7 +615,7 @@ function dx_updated_messages( $messages ) {
 					<?php 
 					foreach ($r_status as $key => $_status) {
 						?>
-						<option id="payment_status_<?php echo $_status; ?>" value="<?php echo $_status; ?>" <?php echo ($key == $payment_status ? 'selected' : '' ) ?>><?php echo $_status; ?></option>
+						<option id="payment_status_<?php echo $_status; ?>" value="<?php echo $_status; ?>" <?php selected($_status, $payment_status ); ?>><?php echo $_status; ?></option>
 						<?php
 					}
 					?>

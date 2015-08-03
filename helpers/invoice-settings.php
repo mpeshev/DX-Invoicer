@@ -151,7 +151,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 													<option id="dx_empty_customer" value=""><?php _e('Pick an existing template', 'dxinvoice'); ?></option>						
 													<?php
 														foreach($result as $singlefile){ ?>
-															<option id="dx_template" value="<?php echo $singlefile; ?>" <?php echo ($singlefile == $invoice_page_template ? 'selected' : '' ) ?>><?php echo $singlefile; ?></option>
+															<option id="dx_template" value="<?php echo $singlefile; ?>" <?php selected($singlefile, $invoice_page_template ); ?> ><?php echo $singlefile; ?></option>
 													<?php	} ?>
 												</select><br />
 												<span class="description"><?php echo __( 'Add template if not exist.', 'dxinvoice' ) ?></span>

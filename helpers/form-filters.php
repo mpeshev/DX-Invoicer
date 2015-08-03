@@ -189,7 +189,7 @@ class DX_Form_Filters {
 						<option id="dx_empty_customer" value=""><?php _e('Pick an existing customer', 'dxinvoice'); ?></option>
 						<?php while( $customers_query->have_posts() ):
 								$customers_query->the_post(); ?>
-						<option id="customer_<?php the_ID(); ?>" value="<?php the_ID(); ?>" <?php echo (get_the_ID() == $value ? 'selected' : '' ) ?>><?php echo the_title(); ?></option>
+						<option id="customer_<?php the_ID(); ?>" value="<?php the_ID(); ?>" <?php selected(get_the_ID(), $value ); ?> > <?php echo the_title(); ?></option>
 						<?php endwhile;
 							wp_reset_postdata();
 						?>
@@ -296,7 +296,7 @@ class DX_Form_Filters {
 							<option id="dx_status_invoice" value=""><?php _e('Select Status Invoice', 'dxinvoice'); ?></option>						
 							<?php
 								foreach($option as $key => $_option){ ?>
-									<option value="<?php echo $key; ?>" <?php if($key == $value) {echo 'selected="selected"';}  ?>><?php echo $_option; ?></option>
+									<option value="<?php echo $key; ?>" <?php selected($key, $value ); ?>><?php echo $_option; ?></option>
 							<?php	} ?>
 					</select>
 					<br />
@@ -361,7 +361,7 @@ class DX_Form_Filters {
 						<option id="dx_empty_customer" value=""><?php _e('Pick an existing template', 'dxinvoice'); ?></option>						
 						<?php
 							foreach($result as $singlefile){ ?>
-								<option value="<?php echo $singlefile; ?>" <?php if($singlefile == $value) {echo 'selected="selected"';}  ?>><?php echo $singlefile; ?></option>
+								<option value="<?php echo $singlefile; ?>" <?php selected($singlefile, $value ); ?> ><?php echo $singlefile; ?></option>
 						<?php	} ?>
 					</select><br />
 					<span class="description"><?php echo __( 'Add template if not exist.', 'dxinvoice' ) ?></span>

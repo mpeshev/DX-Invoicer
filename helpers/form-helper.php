@@ -51,7 +51,7 @@ class DX_Form_Helper {
 					</th>
 					<td><select name="<?php echo $name ?>" id="<?php echo $id_prefix . $id ?>" <?php echo ($type == 'multiselect' ? 'multiple="multiple"' : '') ?> >
 							<?php foreach ($options as $key => $text): ?>
-								<option id="<?php echo $key ?>" value="<?php echo $key ?>" <?php echo ($key == $value ? 'selected' : '' ) ?>><?php echo $text ?></option>
+								<option id="<?php echo $key ?>" value="<?php echo $key ?>" <?php selected($key, $value ); ?> ><?php echo $text ?></option>
 							<?php endforeach ?>
 						</select><br />
 						<span class="description"><?php echo $desc; ?></span>
@@ -67,7 +67,7 @@ class DX_Form_Helper {
 					</th>
 					<td><select name="<?php echo $name ?>[]" id="<?php echo $id_prefix . $id ?>" <?php echo ($type == 'multiselect' ? 'multiple="multiple"' : '') ?> >
 							<?php foreach ($options as $key => $text): ?>
-								<option id="<?php echo $key ?>" value="<?php echo $key ?>" <?php echo ((is_array($value) && in_array($key, $value) ) ? 'selected' : '' ) ?>><?php echo $text ?></option>
+								<option id="<?php echo $key ?>" value="<?php echo $key ?>" <?php selected((is_array($value) && in_array($key, $value) ) , true ); ?> ><?php echo $text ?></option>
 							<?php endforeach ?>
 						</select><br />
 						<span class="description"><?php echo $desc; ?></span>
@@ -210,10 +210,9 @@ class DX_Form_Helper {
 					);
 					$bulk_post = get_posts($args); 
 					foreach ($bulk_post as $post){
-						if(in_array($post->ID,$company_list))
-						echo '<option value="'.$post->ID.'" selected>'.get_post_meta($post->ID,"_company_name",true).'</option>';
-						else 
-						echo '<option value="'.$post->ID.'">'.get_post_meta($post->ID,"_company_name",true).'</option>';
+						?>
+						<option id="<?php echo $post->ID ?>" value="<?php echo $post->ID ?>" <?php selected(in_array($post->ID,$company_list) , true ); ?> ><?php echo get_post_meta($post->ID,"_company_name",true) ?></option>
+						<?php
 					}
 					?>
 				</select>
