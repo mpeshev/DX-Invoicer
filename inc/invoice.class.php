@@ -656,7 +656,6 @@ function dx_updated_messages( $messages ) {
 		            );
 	            }	       
 	            $query->set('meta_query', $query_sort);
-   	        	add_filter('posts_where', array(&$this,'my_custom_posts_where'));
 	        }
     	
 	    }
@@ -688,7 +687,6 @@ function dx_updated_messages( $messages ) {
 	                )
 	            ));
 
-	        	add_filter('posts_where', array(&$this,'my_custom_posts_where'));
 	        }
     	
 	    }

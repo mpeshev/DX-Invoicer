@@ -265,7 +265,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 													<div class="bank_account_append">
 														<?php
 														$dx_company_bank_ac_number_other = get_option('dx_company_bank_ac_number_other'); 
-														if($dx_company_bank_ac_number_other)
+														if(is_array($dx_company_bank_ac_number_other))
 														{
 															foreach ($dx_company_bank_ac_number_other as $key => $value) 
 															{
