@@ -41,11 +41,7 @@ class DX_Invoice_Class {
 						'label' => __('Currency', 'dxinvoice'),
 						'type' => 'select',
 						'desc' => 'Select Currency',
-						'options' => array(
-								'bgn' => __('BGN', 'dxinvoice'),
-								'eur' => __('EUR', 'dxinvoice'),
-								'usd' => __('USD', 'dxinvoice')
-						)
+						'options' => apply_filters('dx_invoice_setting_currency',array())
 				),
 				'_description' => array(
 						'label' => __('Details of the payment', 'dxinvoice'),
@@ -71,6 +67,11 @@ class DX_Invoice_Class {
 						'label' => __('Invoice Signature', 'dxinvoice'),
 						'type' => 'image',
 						'desc' => 'Upload Signature'
+				),
+				'_dx_status_invoice' => array(
+						'label' => __('Status Invoice', 'dxinvoice'),
+						'type' => 'status_invoice',
+						'desc' => 'Select Status Invooce'
 				)
 		);
 		
@@ -121,7 +122,8 @@ class DX_Invoice_Class {
 			));
 			flush_rewrite_rules();
 	}
-	
+
+
 	/**
  * Message Filter
  *
@@ -357,7 +359,7 @@ function dx_updated_messages( $messages ) {
 	
 	 /**
 	 * Add Invoice Setting
-	 /**
+	 * 
 	 * @package DX Invoice
 	 * @since 1.0.0
 	 */
@@ -433,13 +435,23 @@ function dx_updated_messages( $messages ) {
 		$preview = "";
 		$preview1 = "";
 	    if( DX_INV_POST_TYPE == $post->post_type ){
-	       $preview = add_query_arg( array( 'post_type' => DX_INV_POST_TYPE, 'dx_action_validate' => 'generate-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' ) ); 
-	       $preview1 = add_query_arg( array( 'post_type' => DX_INV_POST_TYPE, 'dx_action_validate' => 'download-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' ) ); 
+			$dxinvoice_item_row_data = get_post_meta($post->ID,'dx_invoice_items',true);
+			if($dxinvoice_item_row_data)
+			{
+		       	$preview  = add_query_arg( array( 'post_type' => DX_INV_POST_TYPE, 'dx_action_validate' => 'generate-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' ) ); 
+		       	$preview1 = add_query_arg( array( 'post_type' => DX_INV_POST_TYPE, 'dx_action_validate' => 'download-pdf', 'post_ID' => $post->ID ), admin_url( 'edit.php' ) ); 
+				$disabled = '';
+			}else{
+		       	$preview  = 'javascript: void(0)'; 
+		       	$preview1 = 'javascript: void(0)';
+				$disabled = 'disabled';
+			}
+	        
 	        echo '	
-	        		<a type="submit" class="dx-pdf-generate button" id="" href="'.$preview.'">'.__('Preview Invoice','dxinvoice').'</a>
+	        		<a type="submit" class="dx-pdf-generate button '.$disabled.'" id="" href="'.$preview.'">'.__('Preview Invoice','dxinvoice').'</a>
 	        	';
 	        echo '	
-	        		<a type="submit" class="dx-pdf-generate button" id="" href="'.$preview1.'">'.__('Download Invoice','dxinvoice').'</a>
+	        		<a type="submit" class="dx-pdf-generate button '.$disabled.'" id="" href="'.$preview1.'">'.__('Download Invoice','dxinvoice').'</a>
 	        	';
 	    }
 	}
@@ -456,18 +468,33 @@ function dx_updated_messages( $messages ) {
 		$action_validate = isset($_REQUEST['dx_action_validate'])?$_REQUEST['dx_action_validate']:"";
 		
 		if($action_validate == 'generate-pdf' ){
-			// I for preview
-			$pdf_view_type = 'I';
-			//include_once DX_INV_DIR.'/inc/pdf-library/pdf-template-generate.php';
-			include_once DX_INV_DIR.'/inc/pdf-library/dx-pdf-process.php';
-			//dx_invoice_to_pdf();
+			$dxinvoice_item_row_data = get_post_meta($post_id,'dx_invoice_items',true);
+			if(empty($dxinvoice_item_row_data))
+			{
+				echo"<div class='error'><p>Row Box item cannot be emptied to generate / preview invoice.</p></div>";
+				die();
+			}else{
+				// I for preview
+				$pdf_view_type = 'I';
+				//include_once DX_INV_DIR.'/inc/pdf-library/pdf-template-generate.php';
+				include_once DX_INV_DIR.'/inc/pdf-library/dx-pdf-process.php';
+				//dx_invoice_to_pdf();
+			}
+		
 		}
 		if($action_validate == 'download-pdf' ){
-			// D for download
-			$pdf_view_type = 'D';
-			//include_once DX_INV_DIR.'/inc/pdf-library/pdf-template-generate.php';
-			include_once DX_INV_DIR.'/inc/pdf-library/dx-pdf-process.php';
-			//dx_invoice_to_pdf();
+			$dxinvoice_item_row_data = get_post_meta($post_id,'dx_invoice_items',true);
+			if(empty($dxinvoice_item_row_data))
+			{
+				echo"<div class='error'><p>Row Box item cannot be emptied to generate / preview invoice.</p></div>";
+				die();
+			}else{
+				// D for download
+				$pdf_view_type = 'D';
+				//include_once DX_INV_DIR.'/inc/pdf-library/pdf-template-generate.php';
+				include_once DX_INV_DIR.'/inc/pdf-library/dx-pdf-process.php';
+				//dx_invoice_to_pdf();
+			}
 		}
 	}
 	
@@ -481,8 +508,9 @@ function dx_updated_messages( $messages ) {
 		//return array_merge( $columns, 
       	//array('_customer_name' => 'Customer',
           	 //'_invoice_amount' => 'Invoice Amount'));
-          	 $columns['_customer_name'] = 'Customer';
-          	 $columns['_invoice_amount'] = 'Invoice Amount';
+          	 $columns['_customer_name'] = __('Customer','dxinvoice');
+          	 $columns['_invoice_amount'] = __('Invoice Amount','dxinvoice');
+          	 $columns['_dx_status_invoice'] = __('Invoice Status','dxinvoice');
           	 return $columns;
 	}
 	
@@ -495,14 +523,17 @@ function dx_updated_messages( $messages ) {
 
 	function dx_display_posts( $column, $post_id ) {
 	    switch ( $column ) {
-		case '_customer_name' :
+			case '_customer_name' :
 		   		 $customer_id 	= 	get_post_meta($post_id,'_client',true);
 			   	if(!empty($customer_id)){
 		   			echo get_the_title( $customer_id );
 			   	}
 		   		 break;
-		case '_invoice_amount' :
+			case '_invoice_amount' :
 			    echo get_post_meta( $post_id , '_amount' , true ); 
+		    	break;
+			case '_dx_status_invoice' :
+			    echo get_post_meta( $post_id , '_dx_status_invoice' , true ) == 'unpaid' ? '<p style="color:red;font-weight:bold;">'.get_post_meta( $post_id , '_dx_status_invoice' , true ).'</p>': '<p style="color:green;font-weight:bold;">'.get_post_meta( $post_id , '_dx_status_invoice' , true ).'</p>' ; 
 		    	break;
 	    }
 	}
@@ -516,9 +547,11 @@ function dx_updated_messages( $messages ) {
 	 **/
 	public function dx_invoice_restrict_manage_posts() {
 		
+		global $wpdb;
 		$post_type = isset($_REQUEST['post_type'])?$_REQUEST['post_type']:"";
-		
+			
 		if ( $post_type == DX_INV_POST_TYPE ) {
+
 			$html = '';
 			$customer_id 	  = isset( $_GET['customer_id'] ) ? $_GET['customer_id'] : '';
 			$customers_query = new WP_Query(array(
@@ -526,15 +559,25 @@ function dx_updated_messages( $messages ) {
 					'order' => 'ASC',
 					'orderby' => 'title'
 			));
+			$querystr = "
+			    SELECT $wpdb->posts.* 
+			    FROM $wpdb->posts
+			    WHERE $wpdb->posts.post_status = 'publish' 
+			    AND $wpdb->posts.post_type = 'dx_customer'
+			    ORDER BY $wpdb->posts.post_date DESC
+			 ";
+
+			$r_customer = $wpdb->get_results($querystr, OBJECT);
 			ob_start();
 			?>		
 				<select name="customer_id" id="<?php echo the_ID(); ?>">
 					<option id="dx_empty_customer" value=""><?php _e('Select Customer', 'dxinvoice'); ?></option>
-					<?php while( $customers_query->have_posts() ):
-							$customers_query->the_post(); ?>
-					<option id="customer_<?php the_ID(); ?>" value="<?php the_ID(); ?>" <?php echo (get_the_ID() == $customer_id ? 'selected' : '' ) ?>><?php echo the_title(); ?></option>
-					<?php endwhile;
-						wp_reset_postdata();
+					<?php 
+					foreach ($r_customer as $key => $_customer) {
+						?>
+						<option id="customer_<?php echo $_customer->ID; ?>" value="<?php echo $_customer->ID; ?>" <?php selected($_customer->ID, $customer_id ); ?>><?php echo $_customer->post_title; ?></option>
+						<?php
+					}
 					?>
 				</select>
 			<?php
@@ -542,6 +585,113 @@ function dx_updated_messages( $messages ) {
 			echo  $html;
 	    }
 	}
+
+	/**
+	 * @author Tonjoo
+	 * 
+	 * Handles to filter the data by status payment
+	 * 
+	 * @package DX Invoice
+	 * @since 1.0.0
+	 **/
+	public function dx_invoice_restrict_manage_posts_filter_by_status() {
+		
+		global $wpdb;
+		$post_type = isset($_REQUEST['post_type'])?$_REQUEST['post_type']:"";
+			
+		if ( $post_type == DX_INV_POST_TYPE ) {
+
+			$html = '';
+			$payment_status 	  = isset( $_GET['payment_status'] ) ? $_GET['payment_status'] : '';
+			$r_status = array(
+					'paid' => 'paid',
+					'unpaid' => 'unpaid'
+				);
+
+			ob_start();
+			?>		
+				<select name="payment_status" id="payment_status">
+					<option id="dx_empty_payment" value=""><?php _e('Select Payment Status', 'dxinvoice'); ?></option>
+					<?php 
+					foreach ($r_status as $key => $_status) {
+						?>
+						<option id="payment_status_<?php echo $_status; ?>" value="<?php echo $_status; ?>" <?php selected($_status, $payment_status ); ?>><?php echo $_status; ?></option>
+						<?php
+					}
+					?>
+				</select>
+			<?php
+			$html .= ob_get_clean();
+			echo  $html;
+	    }
+	}
+
+	/**
+	 * @author Tonjoo
+	 * 
+	 * Filter invoice by customer
+	 * @param type $query 
+	 * @return type
+	 */
+	public function get_dx_invoice_by_customer($query) {
+	    global $pagenow;
+
+	    if (is_admin() && $pagenow == 'edit.php' && isset($_GET['post_type']) && $_GET['post_type']=='dx_invoice' && !isset($_GET['invoice_status']) )  {
+
+	        if(current_user_can('manage_options')) {
+	        	if(isset($_GET['payment_status']) && $_GET['payment_status'] != '')
+	        	{
+	        		$query_sort[] =  array(
+		                    'key'       => '_dx_status_invoice',
+		                    'value'     => $_GET['payment_status'],
+		                    'compare'   => '='
+		                );	         
+	        	}
+	        	if(isset($_GET['customer_id']) && $_GET['customer_id'] != '')
+	        	{
+		            $query_sort[] = array(
+		                    'key'       => '_client',
+		                    'value'     => $_GET['customer_id'],
+		                    'compare'   => '='
+		            );
+	            }	       
+	            $query->set('meta_query', $query_sort);
+	        }
+    	
+	    }
+	}
+	/**
+	 * @author Tonjoo
+	 * 
+	 * Query to unpaid invoices for each customer
+	 * @param type $query 
+	 * @return type
+	 */
+	public function get_dx_invoice_by_customer_and_invoice_status($query) {
+	    global $pagenow;
+
+	    if (is_admin() && $pagenow == 'edit.php' && isset($_GET['post_type']) && $_GET['post_type']=='dx_invoice' && isset($_GET['customer_id'])  && isset($_GET['invoice_status']))  {
+
+	        if(current_user_can('manage_options')) {
+
+	            $query->set('meta_query', array(
+	                array(
+	                    'key'       => '_client',
+	                    'value'     => htmlspecialchars($_GET['customer_id']),
+	                    'compare'   => '='
+	                ),
+	                array(
+	                    'key'       => '_dx_status_invoice',
+	                    'value'     => htmlspecialchars($_GET['invoice_status']),
+	                    'compare'   => '='
+	                )
+	            ));
+
+	        }
+    	
+	    }
+	}
+
 	/**
 	 * Handle Filter By Customer
 	 * 
@@ -606,6 +756,7 @@ function dx_updated_messages( $messages ) {
 		  
 		$newcolumn['_customer_name']  = 'customer';
 		$newcolumn['_invoice_amount']  = 'invoiceamount';
+		$newcolumn['_dx_status_invoice']  = 'invoicetotalunpaid';
 		return $newcolumn;
 	}
 	/**
@@ -711,7 +862,7 @@ function dx_updated_messages( $messages ) {
 		if( ! is_single() || DX_INV_POST_TYPE != get_post_type() )
 			return $template;
 		
-			$single = DX_INV_DIR . '/template/' . DX_INV_POST_TYPE . '-single.php';
+			$single = DX_INV_DIR . '/helpers/template/' . DX_INV_POST_TYPE . '-single.php';
 			
 		if( ! file_exists( $single ) )
 			return $template;
@@ -776,7 +927,7 @@ function dx_updated_messages( $messages ) {
 	 * @return  mixed             The overriden template if the conditions are satisfied or default one chosen by WordPress
 	 */
 	public function dx_invoice_update() {
-		
+				
 		$arrayload = str_replace("\\", "", $_POST["invoicedata"]);
 		$invoice_body  =  json_decode($arrayload[0]);
 		$count = 0;
@@ -829,9 +980,13 @@ function dx_updated_messages( $messages ) {
 			$updateval[$i]['discount'] 				= $discount[$i];
 			$updateval[$i]['total'] 				= $total[$i];
 		}
-		
+
+
+
 		$action = isset($_POST['action'])?$_POST['action']:"";
 		if($action == 'dx_invoice_update'){
+
+
 			$post_id 				=	isset($_POST['dx_page_id'])			?$_POST['dx_page_id']		:"";
 	    	$dx_clientname 			= 	isset($_POST['dx_clientname'])		?$_POST['dx_clientname']	:"" ;
 		    $data_clientcompany		=	isset($_POST['data_clientcompany'])	?$_POST['data_clientcompany']:"" ;
@@ -853,22 +1008,25 @@ function dx_updated_messages( $messages ) {
 								      'post_title' => $dx_clientname
 			  );
 			update_post_meta( $post_id, 'dx_invoice_items', $updateval );   
+
 			update_post_meta( $post_id, '_vat_text', str_replace("%","", $vat_value) );   
 		    wp_update_post( $customer_post );
+
+/*
 		    update_post_meta( $customerid, '_bank_account', $data_bankacc );
 		    update_post_meta( $customerid, '_company_name', $data_clientcompany );
 		    update_post_meta( $customerid, '_company_address', $data_clientcomaddr );
 		    update_post_meta( $customerid, '_company_number', $data_clientcomnum );
-		    update_post_meta( $customerid, '_client_name', $data_contactperson );
-		   
-		    $dx_invoice_options['dx_company_person'] 			= $data_customername;
+		    update_post_meta( $customerid, '_client_name', $data_contactperson );		   
+*/
+/*		    $dx_invoice_options['dx_company_person'] 			= $data_customername;
 		    $dx_invoice_options['dx_company_name'] 				= $data_customercomname;
 		    $dx_invoice_options['dx_company_address'] 			= $data_customercomaddr;
 	    	$dx_invoice_options['dx_company_unique_number'] 	= $data_customercomidno;
 		    $dx_invoice_options['dx_company_responsible_person']= $data_customercomcontactp;
 		    $dx_invoice_options['dx_company_bank_ac_number'] 	= $data_setting_account;
 
-		    update_option('dx_invoice_options',$dx_invoice_options);
+		    update_option('dx_invoice_options',$dx_invoice_options);*/
 		    
 		    if(isset($_POST['buttonevent']) && $_POST['buttonevent'] == 'saveandGenerate'){
 		    	$preview1 = add_query_arg( array( 'post_type' => DX_INV_POST_TYPE, 'dx_action_validate' => 'download-pdf', 'post_ID' => $post_id ), admin_url( 'edit.php' ) ); 

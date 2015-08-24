@@ -24,6 +24,13 @@ class DX_Form_Filters {
 		add_action( 'dx_invoicer_form_fields_action', array( $this, 'add_customer_field' ), 10, 6 );
 		add_action( 'dx_invoicer_form_fields_action', array( $this, 'add_custom_templates' ), 10, 6 );
 		add_action( 'dx_invoicer_form_fields_action', array( $this, 'add_stamp_position' ), 10, 6 );
+		add_action( 'dx_invoicer_form_fields_action', array( $this, 'add_status_invoices' ), 10, 6 );
+		add_action( 'do_meta_boxes', array( $this, 'dx_invoice_remove_image_box' ), 10, 6 );
+		add_action( 'do_meta_boxes', array( $this, 'dx_customer_remove_image_box' ), 10, 6 );
+		add_action( 'admin_init', array( $this, 'dx_customer_set_user_metaboxes' ), 10, 6 );
+		add_action( 'admin_init', array( $this, 'dx_invoice_set_user_metaboxes' ), 10, 6 );
+		add_action( 'admin_init', array( $this, 'save_options' ), 10, 6 );
+		add_filter( 'dx_invoice_setting_currency' ,array( $this, 'set_currency' ));
 	}
 	
 	/**
@@ -73,7 +80,7 @@ class DX_Form_Filters {
 										$value = $row[$key];
 									}
 									if($key != 'net' && $key != 'total')
-									echo '<td><input type="text" name="' . $key . '[]" value="' . esc_attr( $value ) . '" class="' . esc_attr( DX_Invoicer::get_default_table_header_classes( $key ) ) . '" /></td>';								
+									echo '<td><input autocomplete="off" type="text" name="' . $key . '[]" value="' . esc_attr( $value ) . '" class="' . esc_attr( DX_Invoicer::get_default_table_header_classes( $key ) ) . '" /></td>';								
 									else 
 									echo '<td><input type="text" name="' . $key . '[]" value="' . esc_attr( $value ) . '" class="' . esc_attr( DX_Invoicer::get_default_table_header_classes( $key ) ) . '" readonly /></td>';								
 								}
@@ -182,7 +189,7 @@ class DX_Form_Filters {
 						<option id="dx_empty_customer" value=""><?php _e('Pick an existing customer', 'dxinvoice'); ?></option>
 						<?php while( $customers_query->have_posts() ):
 								$customers_query->the_post(); ?>
-						<option id="customer_<?php the_ID(); ?>" value="<?php the_ID(); ?>" <?php echo (get_the_ID() == $value ? 'selected' : '' ) ?>><?php echo the_title(); ?></option>
+						<option id="customer_<?php the_ID(); ?>" value="<?php the_ID(); ?>" <?php selected(get_the_ID(), $value ); ?> > <?php echo the_title(); ?></option>
 						<?php endwhile;
 							wp_reset_postdata();
 						?>
@@ -229,6 +236,7 @@ class DX_Form_Filters {
 				</th>
 				<td>
 				<div class="stamp-radio">
+
 					<input type="radio" id="radio1" name="<?php echo $name ?>" value="30" <?php echo ($value == 30)? "checked" :""; ?> >
 					<label for="radio1">Left</label>
 					<input type="radio" id="radio2" name="<?php echo $name ?>" value="90" <?php echo ($value == 90)? "checked" :""; ?> >
@@ -236,6 +244,61 @@ class DX_Form_Filters {
 					<input type="radio" id="radio3" name="<?php echo $name ?>" value="150" <?php echo ($value == 150)? "checked" :""; ?> >
 					<label for="radio3">Right</label>
 				</div>
+					<br />
+					<span class="description"><?php echo __( 'Select Stamp position.', 'dxinvoice' ) ?></span>
+				</td>
+			 </tr>
+			<?php 
+			$output = ob_get_clean();
+			echo apply_filters( 'dx_invoice_filter_invoices_table', $output );
+		}
+	}
+	
+	/**
+	 * Add field for displaying invoice status 
+	 * 
+	 * @param $type field type (text, dx_invoicer_form_field, select, textarea...)
+	 * @param $item the item name
+	 * @param $attributes array with attributes
+	 * @param $method HTTP method where data is stored
+	 * @param $section_prefix a prefix for the section, if any
+	 * @param $id_prefix a prefix for IDs, if any
+	 */
+
+	public function add_status_invoices( $type, $item, $attributes, $method, $section_prefix, $id_prefix ) {
+		if( $type == 'status_invoice' ) {
+			//extract( $attributes );
+			extract( array_merge ($attributes, DX_Form_Helper::get_element_attributes( $item, $attributes, $method ) ) );
+			$label = !empty($label)	? $label	:"";
+		    $type  = !empty($type)	? $type		:"";
+		    $name  = !empty($name)	? $name		:"";
+		    $value = !empty($value)	? $value	:"unpaid";
+		    $text  = !empty($text)	? $text		:"";
+		    $id    = !empty($id)	? $id		:"";
+		    $class = !empty($class)	? $class	:"";
+		    $style = !empty($style)	? $style	:"";
+			$initial_rows = 0;
+			$current_user_id = get_current_user_id();
+
+			$option = array(
+					'unpaid' => __('UNPAID','dxinvoice'),
+					'paid' => __('PAID','dxinvoice')
+				);
+			ob_start();
+
+			?>
+			<tr>
+				<th scope="row">
+					<label for="<?php echo $id_prefix . $id ?>"><?php echo $text ?></label>	
+				</th>
+				<td>
+					<select name="<?php echo $name ?>" id="<?php echo $id_prefix . $id ?>" >
+							<option id="dx_status_invoice" value=""><?php _e('Select Status Invoice', 'dxinvoice'); ?></option>						
+							<?php
+								foreach($option as $key => $_option){ ?>
+									<option value="<?php echo $key; ?>" <?php selected($key, $value ); ?>><?php echo $_option; ?></option>
+							<?php	} ?>
+					</select>
 					<br />
 					<span class="description"><?php echo __( 'Select Stamp position.', 'dxinvoice' ) ?></span>
 				</td>
@@ -275,23 +338,18 @@ class DX_Form_Filters {
 			$initial_rows = 0;
 			$current_user_id = get_current_user_id();
 			
-			$files= DX_INV_DIR."/helpers/page-single-invoice";
+			$files= DX_INV_DIR."/templates";
 			$dir = "";
 			$pred = scandir($files);
-			 foreach ($pred as $key => $rowvalue)
-			   {
-			      if (!in_array($rowvalue,array(".","..")))
-			      {
-			         if (is_dir($dir . DIRECTORY_SEPARATOR . $rowvalue))
-			         {
-			            $result[$rowvalue] = dirToArray($dir . DIRECTORY_SEPARATOR . $rowvalue);
-			         }
-			         else
-			         {
-			            $result[] = $rowvalue;
-			         }
-			      }
-			   } 
+			foreach ($pred as $key => $rowvalue){
+				if (!in_array($rowvalue,array(".",".."))){
+					if (is_dir($dir . DIRECTORY_SEPARATOR . $rowvalue)){
+						$result[$rowvalue] = dirToArray($dir . DIRECTORY_SEPARATOR . $rowvalue);
+					}else{
+						$result[] = $rowvalue;
+					}
+				}
+			} 
 			ob_start();
 			
 			?>
@@ -303,7 +361,7 @@ class DX_Form_Filters {
 						<option id="dx_empty_customer" value=""><?php _e('Pick an existing template', 'dxinvoice'); ?></option>						
 						<?php
 							foreach($result as $singlefile){ ?>
-								<option value="<?php echo $singlefile; ?>" <?php if($singlefile == $value) {echo 'selected="selected"';}  ?>><?php echo $singlefile; ?></option>
+								<option value="<?php echo $singlefile; ?>" <?php selected($singlefile, $value ); ?> ><?php echo $singlefile; ?></option>
 						<?php	} ?>
 					</select><br />
 					<span class="description"><?php echo __( 'Add template if not exist.', 'dxinvoice' ) ?></span>
@@ -325,6 +383,103 @@ class DX_Form_Filters {
 		}
 		
 		self::$instance = new DX_Form_Filters();
+	}
+
+	/**
+	 * Remove featured image from post type dx_invoice
+	 * @return type
+	 */
+	public function dx_invoice_remove_image_box() {
+	   remove_meta_box('postimagediv','dx_invoice','side');
+	}
+
+	/**
+	 * Remove featured image from post type dx_customer
+	 * @return type
+	 */
+	public function dx_customer_remove_image_box() {
+	   remove_meta_box('postimagediv','dx_customer','side');
+	}
+
+	/**
+	 * Auto hide customer field in page dx_invoice for all admin  
+	 * @param type $user_id 
+	 * @return type
+	 */
+	public function dx_invoice_set_user_metaboxes($user_id = NULL) {
+
+	    // So this can be used without hooking into user_register
+	    if ( ! $user_id)
+	        $user_id = get_current_user_id(); 
+
+	    if ( get_user_meta( $user_id, 'metaboxhidden_dx_invoice', true) ) {
+	        $meta_value = array('postcustom','trackbacksdiv','commentstatusdiv','commentsdiv','slugdiv','authordiv','revisionsdiv');
+	        update_user_meta( $user_id, 'metaboxhidden_dx_invoice', $meta_value );
+	    }else{
+	        $meta_value = array('postcustom','trackbacksdiv','commentstatusdiv','commentsdiv','slugdiv','authordiv','revisionsdiv');
+	    	add_user_meta( $user_id, 'metaboxhidden_dx_invoice', $meta_value );
+	    }
+	}
+	/**
+	 * Auto hide customer field in page dx_customer for all admin  
+	 * @param type $user_id 
+	 * @return type
+	 */
+	public function dx_customer_set_user_metaboxes($user_id = NULL) 
+	{
+	    // So this can be used without hooking into user_register
+	    if ( ! $user_id)
+	        $user_id = get_current_user_id(); 
+
+	    if ( get_user_meta( $user_id, 'metaboxhidden_dx_customer', true) ) {
+	        $meta_value = array('postcustom','trackbacksdiv','commentstatusdiv','commentsdiv','slugdiv','authordiv','revisionsdiv');
+	        update_user_meta( $user_id, 'metaboxhidden_dx_customer', $meta_value );
+	    }else{
+	        $meta_value = array('postcustom','trackbacksdiv','commentstatusdiv','commentsdiv','slugdiv','authordiv','revisionsdiv');
+	    	add_user_meta( $user_id, 'metaboxhidden_dx_customer', $meta_value );
+	    }
+	}
+
+	/**
+	 * save other bank account
+	 * @return type
+	 */
+	public function save_options()
+	{
+		if(isset($_POST['dx_invoice_options'])){
+			
+			$option_name = 'dx_company_bank_ac_number_other' ;
+			$new_value = $_POST['dx_company_bank_ac_number_other'] ;
+
+			if ( get_option( $option_name ) !== false ) {
+
+			    // The option already exists, so we just update it.
+			    update_option( $option_name, $new_value );
+
+			} else {
+
+			    // The option hasn't been added yet. We'll add it with $autoload set to 'yes'.
+			    $deprecated = null;
+			    $autoload = 'yes';
+			    add_option( $option_name, $new_value, $deprecated, $autoload );
+			}
+
+		}
+
+	}
+
+	/**
+	 * filter to change currency
+	 * @return array
+	 */
+	public function set_currency($currency = array()){
+
+		$currency['bgn'] = __('BGN', 'dxinvoice');
+		$currency['eur'] = __('EUR', 'dxinvoice');
+		$currency['usd'] = __('USD', 'dxinvoice');
+		$currency['idr'] = __('IDR', 'dxinvoice');
+
+		return $currency;
 	}
 	
 }

@@ -22,7 +22,7 @@ function dxInvoiceTable( tableClass, tableId ) {
 				
 			}
 			if(fields[i] != 'net' && fields[i] != 'total' )
-			row_content += '<td><input type="text" name="' + fields[i] + '[]" class="' + field_class +  '" value="' + field_value + '" /></td>';
+			row_content += '<td><input autocomplete="off" type="text" name="' + fields[i] + '[]" class="' + field_class +  '" value="' + field_value + '" /></td>';
 			else
 			row_content += '<td><input type="text" name="' + fields[i] + '[]" class="' + field_class +  '" readonly value="' + field_value + '" /></td>';
 		}
@@ -76,8 +76,6 @@ jQuery(document).ready(function($) {
 		$('input[name="_vat_text"]').val($(this).val());
 	});
 	
-	
-	
 	// add new invoice row handler
 	$('#dx-items-table-meta-wrapper .dx_invoice_add_row').on('click', function( e ) {
 		e.preventDefault();
@@ -93,9 +91,17 @@ jQuery(document).ready(function($) {
 		e.preventDefault();
 		var mainTable = new dxInvoiceTable( 'dx_invoice_field_table' );
 		mainTable.delete_row( this );
-		
+
 		var rows = $('#dx-items-table-meta-wrapper .dx_invoice_field_table tbody tr').size();
 		$('#dx_invoice_rows_number').val(rows);
+
+		check_row();
+		count_net_row();
+		count_total_row();
+		total_amount();
+		count_net_column();
+		count_total_column();
+		count_vat_total();
 		
 	});
 	

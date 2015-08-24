@@ -5,7 +5,6 @@
 
 // Exit if accessed directly
 if ( !defined( 'ABSPATH' ) ) exit;
-
 ?>
 <div class="wrap">
 	
@@ -25,7 +24,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 		
 	<form  method="post" action="options.php">		
 		<?php
-			$files= DX_INV_DIR."/helpers/page-single-invoice";
+			$files= DX_INV_DIR."/templates";
 			$dir = "";
 			$dx_google_callback_url = add_query_arg( array( 'page' => 'dx_invoice_google_settings'), admin_url( 'admin.php' ) ); 
 			$pred = scandir($files);
@@ -54,6 +53,8 @@ if ( !defined( 'ABSPATH' ) ) exit;
 			/*	Company Detail		*/
 			$dx_company_person 			= isset($dx_invoice_options['dx_company_person'])?$dx_invoice_options['dx_company_person']:"";
 			$dx_company_name 			= isset($dx_invoice_options['dx_company_name'])?$dx_invoice_options['dx_company_name']:"";
+			$dx_company_email 			= isset($dx_invoice_options['dx_company_email'])?$dx_invoice_options['dx_company_email']:"";
+			$dx_company_website			= isset($dx_invoice_options['dx_company_website'])?$dx_invoice_options['dx_company_website']:"";
 			$dx_company_address 		= isset($dx_invoice_options['dx_company_address'])?$dx_invoice_options['dx_company_address']:"";
 			$dx_company_unique_number	= isset($dx_invoice_options['dx_company_unique_number'])?$dx_invoice_options['dx_company_unique_number']:"";
 			$dx_company_responsible_person	= isset($dx_invoice_options['dx_company_responsible_person'])?$dx_invoice_options['dx_company_responsible_person']:"";
@@ -150,7 +151,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 													<option id="dx_empty_customer" value=""><?php _e('Pick an existing template', 'dxinvoice'); ?></option>						
 													<?php
 														foreach($result as $singlefile){ ?>
-															<option id="dx_template" value="<?php echo $singlefile; ?>" <?php echo ($singlefile == $invoice_page_template ? 'selected' : '' ) ?>><?php echo $singlefile; ?></option>
+															<option id="dx_template" value="<?php echo $singlefile; ?>" <?php selected($singlefile, $invoice_page_template ); ?> ><?php echo $singlefile; ?></option>
 													<?php	} ?>
 												</select><br />
 												<span class="description"><?php echo __( 'Add template if not exist.', 'dxinvoice' ) ?></span>
@@ -158,7 +159,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 										 </tr>
 											<tr>
 												<td colspan="2">
-													<input type="submit" class="button-primary dx-invoice-settings-save" name="dx_invoice_settings_save" class="" value="<?php echo __( 'Save Changes', 'dxinvoice' ) ?>" />
+													<input type="submit" class="button-primary dx-invoice-settings-save" name="dx_invoice_settings_save" value="<?php echo __( 'Save Changes', 'dxinvoice' ) ?>" />
 												</td>
 											</tr>
 										</tbody>
@@ -214,6 +215,23 @@ if ( !defined( 'ABSPATH' ) ) exit;
 											 </tr>
 											 <tr>
 												<th scope="row">
+													<label for="dx-company-address"><strong><?php echo __( 'Company Website Address', 'dxinvoice' ) ?></strong></label>
+												</th>
+												<td><input type="text" id="dx-company-name"  name="dx_invoice_options[dx_company_website]" value="<?php echo $dx_company_website; ?>" size="63" /><br />
+													<span class="description"><?php echo __( 'Enter Company Website Address', 'dxinvoice' ) ?></span>
+												</td>
+											 </tr>
+
+											 <tr>
+												<th scope="row">
+													<label for="dx-company-address"><strong><?php echo __( 'Company Email Address', 'dxinvoice' ) ?></strong></label>
+												</th>
+												<td><input type="text" id="dx-company-name"  name="dx_invoice_options[dx_company_email]" value="<?php echo $dx_company_email; ?>" size="63" /><br />
+													<span class="description"><?php echo __( 'Enter Company Email Address', 'dxinvoice' ) ?></span>
+												</td>
+											 </tr>
+											 <tr>
+												<th scope="row">
 													<label for="dx-company-address"><strong><?php echo __( 'Company Address', 'dxinvoice' ) ?></strong></label>
 												</th>
 												<td><textarea rows="5" cols="60" name="dx_invoice_options[dx_company_address]"><?php echo $dx_company_address; ?></textarea><br>
@@ -240,7 +258,25 @@ if ( !defined( 'ABSPATH' ) ) exit;
 												<th scope="row">
 													<label for="dx-company-bank-ac-number"><strong><?php echo __( 'Bank Account Number', 'dxinvoice' ) ?></strong></label>
 												</th>
-												<td><input type="text" id="dx-company-bank-ac-number" name="dx_invoice_options[dx_company_bank_ac_number]" value="<?php echo $dx_company_bank_ac_number; ?>" size="63" /><br />
+												<td>
+													<input type="text" id="dx-company-bank-ac-number" name="dx_invoice_options[dx_company_bank_ac_number]" value="<?php echo $dx_company_bank_ac_number; ?>" size="63" />
+													<div class="btn btn-default btn-sm" id="add-more-bank-account"> add more</div>
+													
+													<div class="bank_account_append">
+														<?php
+														$dx_company_bank_ac_number_other = get_option('dx_company_bank_ac_number_other'); 
+														if(is_array($dx_company_bank_ac_number_other))
+														{
+															foreach ($dx_company_bank_ac_number_other as $key => $value) 
+															{
+															?>
+																<div><input type="text" class="new_bank_account_append" name="dx_company_bank_ac_number_other[]" value="<?php echo $value?>" size="63" /><div class="btn btn-danger btn-sm remove"> remove</div></div>
+															<?php														
+															}
+														}
+														?>
+													</div>
+													<br />
 													<span class="description"><?php echo __( 'Enter Company Bank Account Number', 'dxinvoice' ) ?></span>
 												</td>
 											 </tr>

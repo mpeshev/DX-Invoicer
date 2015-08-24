@@ -176,7 +176,8 @@ class DX_Customer_Class {
 	function add_customer_invoice_column($columns) {
 		return array_merge( $columns, 
       	array('_total_invoice' => __('Total Invoice','dxinvoice'),
-          	 '_total_invoice_amount' => __('Total Invoice Amount','dxinvoice')));
+          	 '_total_invoice_amount' => __('Total Invoice Amount','dxinvoice'),
+          	 '_total_invoice_unpaid' => __('Total Invoice Unpaid','dxinvoice')));
 	}
 	/**
 	 * Get Total of Invoice
@@ -188,36 +189,43 @@ class DX_Customer_Class {
 	function dx_display_customer_invoice_total( $column, $post_id ) {
 		global $wpdb ;
 	    switch ( $column ) {
-		case '_total_invoice' :
-		   		
-		   		 $querystr = "
-			    SELECT $wpdb->posts.* 
-			    FROM $wpdb->posts, $wpdb->postmeta
-			    WHERE $wpdb->posts.ID = $wpdb->postmeta.post_id 
-			    AND $wpdb->postmeta.meta_key = '_client' 
-			    AND $wpdb->postmeta.meta_value = $post_id 
-			    AND $wpdb->posts.post_status = 'publish' 
-			    AND $wpdb->posts.post_type = 'dx_invoice'
-			    ORDER BY $wpdb->posts.post_date DESC
-			 ";
-		   		 $pageposts = $wpdb->get_results($querystr, OBJECT);
-		    	 echo count($pageposts);
-		   		 break;
+			case '_total_invoice' :
+
+				$args = array(
+					'post_type' 	=> 'dx_invoice',
+					'ID' 			=> "$wpdb->postmeta.post_id",
+					'order'			=> 'DESC',
+					'post_status' 	=> 'publish',
+					'meta_query' 	=> array(
+										array(
+											'key' => '_client',
+											'value' => $post_id,
+										)
+					)
+				 );
+				
+				$pageposts = get_posts( $args );
+				
+		    	echo count($pageposts);
+			break;
 		
-		case '_total_invoice_amount' :
+			case '_total_invoice_amount' :
 		   		 
-		   		 $querystr = "
-			    SELECT $wpdb->posts.* 
-			    FROM $wpdb->posts, $wpdb->postmeta
-			    WHERE $wpdb->posts.ID = $wpdb->postmeta.post_id 
-			    AND $wpdb->postmeta.meta_key = '_client' 
-			    AND $wpdb->postmeta.meta_value = $post_id 
-			    AND $wpdb->posts.post_status = 'publish' 
-			    AND $wpdb->posts.post_type = 'dx_invoice'
-			    ORDER BY $wpdb->posts.post_date DESC
-			 ";
-		   		 $pageposts = $wpdb->get_results($querystr, OBJECT);
-		    	
+				$args = array(
+					'post_type' 	=> 'dx_invoice',
+					'ID' 			=> "$wpdb->postmeta.post_id",
+					'order'			=> 'DESC',
+					'post_status' 	=> 'publish',
+					'meta_query' 	=> array(
+										array(
+											'key' => '_client',
+											'value' => $post_id,
+										)
+					)
+				 );
+
+				$pageposts = get_posts( $args );
+
 			    $amount_invoice = array();
 			    foreach ( $pageposts as $key => $project ){
 			    	
@@ -225,7 +233,33 @@ class DX_Customer_Class {
 			    }
 		   		
 			   	echo array_sum($amount_invoice);
-		   		 break;
+			break;
+		
+			case '_total_invoice_unpaid' :
+		   		 
+				$args = array(
+					'post_type' 	=> 'dx_invoice',
+					'ID' 			=> "$wpdb->postmeta.post_id",
+					'order'			=> 'DESC',
+					'post_status' 	=> 'publish',
+					'meta_query' 	=> array(
+										array(
+											'key' => '_client',
+											'value' => $post_id,
+										)
+					)
+				 );
+				$pageposts = get_posts( $args );
+
+			    $total_unpid = 0;
+			    foreach ( $pageposts as $key => $project ){
+			    	if(get_post_meta($project->ID,'_dx_status_invoice',true) == 'unpaid' ){
+			    		$total_unpid += 1;
+			    	}
+			    }
+		   		
+			   	echo "<a href='".admin_url('edit.php?orderby=customer&post_status=all&post_type=dx_invoice&customer_id='.$post_id.'&invoice_status=unpaid')."'>".$total_unpid.'</a>';
+			break;
 	    }
 	}
 	
@@ -264,6 +298,7 @@ class DX_Customer_Class {
 		  
 		$newcolumn['_total_invoice']  = 'customer';
 		$newcolumn['_total_invoice_amount']  = 'invoiceamount';
+		$newcolumn['_total_invoice_unpaid']  = 'invoiceunpaid';
 		return $newcolumn;
 	}
 }
