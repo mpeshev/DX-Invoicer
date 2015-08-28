@@ -639,6 +639,8 @@ function dx_updated_messages( $messages ) {
 	    if (is_admin() && $pagenow == 'edit.php' && isset($_GET['post_type']) && $_GET['post_type']=='dx_invoice' && !isset($_GET['invoice_status']) )  {
 
 	        if(current_user_can('manage_options')) {
+	        	$query_sort = array();
+	        	
 	        	if(isset($_GET['payment_status']) && $_GET['payment_status'] != '')
 	        	{
 	        		$query_sort[] =  array(
@@ -654,8 +656,11 @@ function dx_updated_messages( $messages ) {
 		                    'value'     => $_GET['customer_id'],
 		                    'compare'   => '='
 		            );
-	            }	       
-	            $query->set('meta_query', $query_sort);
+	            }
+	            
+	            if ( ! empty( $query_sort ) ) {
+	            	$query->set('meta_query', $query_sort);
+	            }
 	        }
     	
 	    }
